@@ -8,7 +8,6 @@
     <meta name="theme-color" content="#1e293b">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --primary: #2563eb;
@@ -34,10 +33,12 @@
             display: flex;
             flex-direction: column;
         }
-        header {
+        
+        /* App Header */
+        .app-header {
             background: var(--slate-800);
             border-bottom: 1px solid var(--slate-700);
-            padding: 12px 16px;
+            padding: 10px 14px;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -45,37 +46,61 @@
             top: 0;
             z-index: 20;
         }
-        .header-title h1 {
-            font-size: 16px;
-            margin: 0;
-            color: #38bdf8;
+        .header-brand {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 10px;
         }
-        .header-title p {
+        .app-icon {
+            font-size: 22px;
+            line-height: 1;
+        }
+        .app-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #38bdf8;
+            margin: 0;
+            line-height: 1.2;
+        }
+        .app-subtitle {
             font-size: 11px;
             color: #94a3b8;
             margin: 2px 0 0;
+            line-height: 1.2;
         }
-        .badge-live {
-            background: rgba(16, 185, 129, 0.15);
-            color: var(--emerald);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-            font-size: 11px;
-            padding: 3px 8px;
+        .header-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(16, 185, 129, 0.12);
+            border: 1px solid rgba(16, 185, 129, 0.25);
+            padding: 4px 10px;
             border-radius: 999px;
-            font-weight: bold;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--emerald);
+            box-shadow: 0 0 6px var(--emerald);
+        }
+        #backend-status-text {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--emerald);
+        }
+
         main {
             flex: 1;
             max-width: 800px;
             width: 100%;
             margin: 0 auto;
-            padding: 14px;
+            padding: 12px;
             display: flex;
             flex-direction: column;
-            gap: 14px;
+            gap: 12px;
         }
         .card {
             background: var(--slate-800);
@@ -91,61 +116,207 @@
         }
         .card-title {
             font-size: 14px;
-            font-weight: bold;
+            font-weight: 700;
             color: #38bdf8;
             margin: 0;
             display: flex;
             align-items: center;
             gap: 6px;
         }
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
+        .badge-count {
+            font-size: 11px;
+            color: #94a3b8;
+            background: rgba(51, 65, 85, 0.5);
+            padding: 2px 8px;
+            border-radius: 999px;
+            border: 1px solid var(--slate-700);
+        }
+
+        /* Filter Chips */
+        .filter-chips {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 10px;
+            overflow-x: auto;
+            padding-bottom: 2px;
+        }
+        .chip {
+            background: var(--slate-900);
+            border: 1px solid var(--slate-700);
+            color: #94a3b8;
+            padding: 5px 12px;
+            border-radius: 999px;
+            font-size: 11.5px;
+            font-family: inherit;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.15s ease;
+        }
+        .chip:hover {
+            border-color: #38bdf8;
+            color: #fff;
+        }
+        .chip.active {
+            background: #0284c7;
+            border-color: #38bdf8;
+            color: #fff;
+            font-weight: 600;
+        }
+
+        /* Search Bar */
+        .search-bar {
+            position: relative;
             margin-bottom: 10px;
         }
-        @media (max-width: 540px) {
-            .form-row { grid-template-columns: 1fr; }
-        }
-        label {
-            display: block;
-            font-size: 12px;
-            color: #94a3b8;
-            margin-bottom: 4px;
-            font-weight: 500;
-        }
-        select, input, textarea {
+        .search-bar input {
             width: 100%;
             background: var(--slate-900);
             border: 1px solid var(--slate-700);
-            border-radius: 8px;
-            padding: 9px 12px;
+            border-radius: 10px;
+            padding: 10px 14px;
             color: #fff;
-            font-size: 14px;
+            font-size: 13.5px;
             font-family: inherit;
+            transition: border-color 0.2s;
         }
-        select:focus, input:focus, textarea:focus {
+        .search-bar input:focus {
             outline: none;
             border-color: #38bdf8;
+            box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
         }
-        .machine-info {
-            background: rgba(15, 23, 42, 0.6);
-            border-radius: 8px;
-            padding: 10px;
-            font-size: 12px;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-            gap: 8px;
-            border: 1px dashed var(--slate-700);
-        }
-        .machine-info div b {
+        .btn-clear {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: transparent;
+            border: none;
             color: #94a3b8;
-            display: block;
-            font-size: 10px;
+            font-size: 14px;
+            cursor: pointer;
+            padding: 4px 8px;
         }
-        .machine-info div span {
-            color: #f1f5f9;
+
+        /* Machines List */
+        .machines-list {
+            max-height: 250px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            padding-left: 2px;
+        }
+        .machine-item {
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid var(--slate-700);
+            border-radius: 10px;
+            padding: 10px 12px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .machine-item:hover, .machine-item:active {
+            background: rgba(30, 41, 59, 0.95);
+            border-color: #38bdf8;
+            transform: translateY(-1px);
+        }
+        .item-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+        }
+        .item-name {
+            font-size: 13.5px;
             font-weight: 600;
+            color: #f1f5f9;
+        }
+        .item-badge {
+            font-size: 10px;
+            padding: 2px 7px;
+            border-radius: 4px;
+            white-space: nowrap;
+        }
+        .item-badge.catalog {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--emerald);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        .item-meta {
+            font-size: 11px;
+            color: #94a3b8;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        /* Selected Machine Hero Banner */
+        .selected-banner {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%);
+            border: 1px solid rgba(56, 189, 248, 0.4);
+            border-radius: 12px;
+            padding: 12px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+        }
+        .selected-main {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+        }
+        .selected-icon {
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+        .selected-content {
+            min-width: 0;
+        }
+        .selected-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #38bdf8;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .selected-meta {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 4px;
+            flex-wrap: wrap;
+        }
+        .pill {
+            font-size: 10px;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid var(--slate-700);
+            color: #cbd5e1;
+            padding: 1px 7px;
+            border-radius: 4px;
+        }
+        .btn-change {
+            background: rgba(51, 65, 85, 0.7);
+            border: 1px solid var(--slate-600);
+            color: #38bdf8;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-family: inherit;
+            font-weight: 600;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: all 0.15s ease;
+        }
+        .btn-change:hover {
+            background: var(--slate-700);
+            border-color: #38bdf8;
         }
 
         /* Chat Console */
@@ -223,6 +394,20 @@
             display: flex;
             gap: 8px;
         }
+        .chat-input-bar input {
+            flex: 1;
+            background: var(--slate-900);
+            border: 1px solid var(--slate-700);
+            border-radius: 10px;
+            padding: 10px 14px;
+            color: #fff;
+            font-size: 14px;
+            font-family: inherit;
+        }
+        .chat-input-bar input:focus {
+            outline: none;
+            border-color: #38bdf8;
+        }
         .btn {
             background: var(--primary);
             color: #fff;
@@ -278,6 +463,17 @@
             font-size: 16px;
             color: #38bdf8;
         }
+        .modal textarea {
+            width: 100%;
+            background: var(--slate-900);
+            border: 1px solid var(--slate-700);
+            border-radius: 8px;
+            padding: 9px 12px;
+            color: #fff;
+            font-size: 13.5px;
+            font-family: inherit;
+            margin-top: 6px;
+        }
         .modal-buttons {
             display: flex;
             justify-content: flex-end;
@@ -288,59 +484,71 @@
     </style>
 </head>
 <body>
-    <header>
-        <div class="header-title">
-            <h1>🛠️ منظومة الصيانة الذكية <span style="font-size: 12px; color: #94a3b8;">(Core API & PWA)</span></h1>
-            <p>تشخيص فوري من كتالوجات الماكينات | جلسات مؤقتة مع تلخيص وتطهير ذاتي</p>
+    <header class="app-header">
+        <div class="header-brand">
+            <span class="app-icon">🛠️</span>
+            <div>
+                <h1 class="app-title">منظومة الصيانة الذكية</h1>
+                <p class="app-subtitle">كتالوجات الماكينات والتشخيص الفوري</p>
+            </div>
         </div>
-        <div style="display: flex; align-items: center; gap: 8px;">
-            <span id="backend-status" class="badge-live">جاري الاتصال...</span>
-            <button id="btn-open-settings" class="btn" style="padding: 4px 10px; font-size: 11px; background: var(--slate-700);" title="إعدادات الربط السحابي بدون أنفاق">⚙️ السحابة</button>
+        <div class="header-status">
+            <span class="status-dot"></span>
+            <span id="backend-status-text">4G متصل</span>
         </div>
     </header>
 
     <main>
         <!-- 1. Machine Selection Card -->
-        <div class="card">
+        <div id="machine-picker-card" class="card">
             <div class="card-header">
                 <h2 class="card-title">🏭 اختيار الماكينة</h2>
-                <span id="machines-count" class="badge-live" style="background: transparent; border: none; color: #94a3b8;">0 ماكينة</span>
+                <span id="machines-count" class="badge-count">0 ماكينة</span>
             </div>
-            <div class="form-row">
-                <div>
-                    <label for="select-site">الموقع (Site):</label>
-                    <select id="select-site">
-                        <option value="">-- اختر الموقع --</option>
-                        <option value="ACACIA">مبنى الأكاسيا (ACACIA)</option>
-                        <option value="PALMIER">مبنى البالميي (PALMIER)</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="select-section">القسم (Section / Line):</label>
-                    <select id="select-section" disabled>
-                        <option value="">-- اختر القسم أولاً --</option>
-                    </select>
-                </div>
+
+            <!-- Quick Site Filter Chips -->
+            <div class="filter-chips">
+                <button type="button" class="chip active" data-site="ALL">الكل</button>
+                <button type="button" class="chip" data-site="ACACIA">مبنى الأكاسيا (Acacia)</button>
+                <button type="button" class="chip" data-site="PALMIER">مبنى البالميي (Palmier)</button>
             </div>
-            <div>
-                <label for="select-machine">الماكينة المستهدفة:</label>
-                <select id="select-machine" disabled>
-                    <option value="">-- اختر الماكينة للتشخيص --</option>
-                </select>
+
+            <!-- Smart Search Bar -->
+            <div class="search-bar">
+                <input type="text" id="machine-search-input" placeholder="🔍 اكتب اسم الماكينة، الموديل، أو الكود (مثال: FE55, Korber, 53)..." autocomplete="off" />
+                <button type="button" id="btn-clear-search" class="btn-clear hidden">✕</button>
             </div>
-            <div id="machine-details" class="machine-info hidden" style="margin-top: 10px;">
-                <div><b>كود الماكينة (ID)</b><span id="det-id">-</span></div>
-                <div><b>كود JDE</b><span id="det-jde">-</span></div>
-                <div><b>الموديل / المُصنع</b><span id="det-model">-</span></div>
-                <div><b>الغرفة</b><span id="det-room">-</span></div>
+
+            <!-- Machines List -->
+            <div id="machines-list" class="machines-list">
+                <div style="text-align: center; color: #94a3b8; padding: 20px 0; font-size: 13px;">جاري تحميل دليل الماكينات...</div>
             </div>
         </div>
 
-        <!-- 2. Diagnostic & Ephemeral Chat Card -->
+        <!-- 2. Selected Machine Hero Banner -->
+        <div id="selected-machine-banner" class="selected-banner hidden">
+            <div class="selected-main">
+                <div class="selected-icon">⚙️</div>
+                <div class="selected-content">
+                    <div class="selected-title" id="banner-name">اسم الماكينة</div>
+                    <div class="selected-meta">
+                        <span class="pill" id="banner-bld">الموقع</span>
+                        <span class="pill" id="banner-sec">القسم</span>
+                        <span class="pill" id="banner-room">الغرفة</span>
+                        <span class="pill" id="banner-jde">JDE</span>
+                    </div>
+                </div>
+            </div>
+            <button type="button" id="btn-change-machine" class="btn-change">
+                <span>تغيير</span> ↺
+            </button>
+        </div>
+
+        <!-- 3. Diagnostic & Ephemeral Chat Card -->
         <div id="chat-section" class="card chat-container hidden">
             <div class="card-header">
                 <h2 class="card-title">💬 جلسة تشخيص العطل المؤقتة</h2>
-                <span id="session-status" class="badge-live">نشطة 🟢</span>
+                <span id="session-status" class="badge-count" style="color: var(--emerald); border-color: rgba(16, 185, 129, 0.3);">نشطة 🟢</span>
             </div>
             <div id="messages-area" class="messages-area">
                 <div class="message assistant">
@@ -349,7 +557,7 @@
             </div>
 
             <div class="chat-input-bar">
-                <input type="text" id="query-input" placeholder="اكتب وصف العطل أو كود الإنذار (مثال: Alarm 240 heating)..." />
+                <input type="text" id="query-input" placeholder="اكتب كود العطل أو الإنذار (مثال: 501, heating, sensor)..." />
                 <button id="btn-send" class="btn">
                     <span>فحص العطل</span> 🔍
                 </button>
@@ -363,7 +571,7 @@
             </div>
         </div>
 
-        <!-- 3. Closed Session Summary Confirmation Banner -->
+        <!-- 4. Closed Session Summary Confirmation Banner -->
         <div id="archive-banner" class="card hidden" style="border-color: var(--emerald); background: rgba(16, 185, 129, 0.08);">
             <h3 style="color: var(--emerald); margin: 0 0 6px; font-size: 14px;">✅ تم إغلاق الجلسة وتطهير الذاكرة</h3>
             <p id="archive-summary-text" style="font-size: 12px; color: #cbd5e1; margin: 0; line-height: 1.5;"></p>
@@ -378,7 +586,7 @@
             <p style="font-size: 12px; color: #94a3b8; margin: 0 0 10px;">
                 سيتم استخراج ملخص هندسي وحفظه في سجل أعطال الماكينة، ومسح المحادثة المؤقتة نهائياً من الذاكرة.
             </p>
-            <label for="close-notes">إيه الإجراء أو الحل اللي تم تطبيقه؟ (اختياري):</label>
+            <label for="close-notes" style="font-size: 12px; color: #94a3b8;">إيه الإجراء أو الحل اللي تم تطبيقه؟ (اختياري):</label>
             <textarea id="close-notes" rows="3" placeholder="مثال: تم تنظيف الحساس وتغيير الريلاي واشتغلت الماكينة طبيعي..."></textarea>
             <div class="modal-buttons">
                 <button id="btn-cancel-modal" class="btn" style="background: var(--slate-700);">إلغاء</button>
@@ -387,43 +595,31 @@
         </div>
     </div>
 
-    <!-- Cloud Broker Settings Modal -->
-    <div id="settings-modal" class="modal-overlay hidden">
-        <div class="modal">
-            <h3>⚙️ ربط وسيط السحابة (Zero-Tunnel Outbound)</h3>
-            <p style="font-size: 12px; color: #94a3b8; margin: 0 0 10px; line-height: 1.5;">
-                لتشغيل المنظومة من خارج الشبكة بدون فتح أي أنفاق أو منافذ على السيرفر، أدخل بيانات Supabase:
-            </p>
-            <label for="cfg-supabase-url">رابط المشروع (Supabase URL):</label>
-            <input type="text" id="cfg-supabase-url" placeholder="https://xyz.supabase.co" style="margin-bottom: 8px;" />
-
-            <label for="cfg-supabase-key">المفتاح العام (Anon Public Key):</label>
-            <input type="text" id="cfg-supabase-key" placeholder="eyJhbGciOi..." style="margin-bottom: 12px;" />
-
-            <div style="display: flex; gap: 8px; justify-content: space-between; align-items: center;">
-                <button id="btn-clear-settings" class="btn btn-red" style="padding: 6px 10px; font-size: 11px;">مسح (وضع محلي)</button>
-                <div style="display: flex; gap: 8px;">
-                    <button id="btn-cancel-settings" class="btn" style="background: var(--slate-700); font-size: 12px;">إلغاء</button>
-                    <button id="btn-save-settings" class="btn btn-emerald" style="font-size: 12px;">حفظ وتفعيل</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <script>
         let allMachines = [];
-        let sectionsBySite = {};
         let currentSessionId = null;
         let selectedMachine = null;
-        let brokerMode = 'local'; // 'cloud' or 'local'
-        let supabaseClient = null;
-        let jobPollTimer = null;
+        let activeSiteFilter = 'ALL';
+        let brokerMode = '4g-relay';
+
+        const QUEUE_CHANNEL = "cairo_tech_pwa_queue_78a1bc49df20";
 
         // Elements
-        const selectSite = document.getElementById('select-site');
-        const selectSection = document.getElementById('select-section');
-        const selectMachine = document.getElementById('select-machine');
-        const machineDetails = document.getElementById('machine-details');
+        const machinePickerCard = document.getElementById('machine-picker-card');
+        const machineSearchInput = document.getElementById('machine-search-input');
+        const btnClearSearch = document.getElementById('btn-clear-search');
+        const machinesListEl = document.getElementById('machines-list');
+        const machinesCountEl = document.getElementById('machines-count');
+        const siteChips = document.querySelectorAll('.filter-chips .chip');
+
+        const selectedMachineBanner = document.getElementById('selected-machine-banner');
+        const bannerName = document.getElementById('banner-name');
+        const bannerBld = document.getElementById('banner-bld');
+        const bannerSec = document.getElementById('banner-sec');
+        const bannerRoom = document.getElementById('banner-room');
+        const bannerJde = document.getElementById('banner-jde');
+        const btnChangeMachine = document.getElementById('btn-change-machine');
+
         const chatSection = document.getElementById('chat-section');
         const messagesArea = document.getElementById('messages-area');
         const queryInput = document.getElementById('query-input');
@@ -436,197 +632,160 @@
         const closeNotes = document.getElementById('close-notes');
         const archiveBanner = document.getElementById('archive-banner');
         const archiveSummaryText = document.getElementById('archive-summary-text');
-        const backendStatus = document.getElementById('backend-status');
+        const backendStatusText = document.getElementById('backend-status-text');
 
-        // Settings Elements
-        const btnOpenSettings = document.getElementById('btn-open-settings');
-        const settingsModal = document.getElementById('settings-modal');
-        const btnCancelSettings = document.getElementById('btn-cancel-settings');
-        const btnSaveSettings = document.getElementById('btn-save-settings');
-        const btnClearSettings = document.getElementById('btn-clear-settings');
-        const cfgSupabaseUrl = document.getElementById('cfg-supabase-url');
-        const cfgSupabaseKey = document.getElementById('cfg-supabase-key');
-
-        // 1. Settings Dialog Handlers
-        btnOpenSettings.addEventListener('click', () => {
-            cfgSupabaseUrl.value = localStorage.getItem('PRJ30_SUPABASE_URL') || '';
-            cfgSupabaseKey.value = localStorage.getItem('PRJ30_SUPABASE_KEY') || '';
-            settingsModal.classList.remove('hidden');
-        });
-
-        btnCancelSettings.addEventListener('click', () => {
-            settingsModal.classList.add('hidden');
-        });
-
-        btnSaveSettings.addEventListener('click', () => {
-            const url = cfgSupabaseUrl.value.trim();
-            const key = cfgSupabaseKey.value.trim();
-            if (url && key) {
-                localStorage.setItem('PRJ30_SUPABASE_URL', url);
-                localStorage.setItem('PRJ30_SUPABASE_KEY', key);
-            }
-            settingsModal.classList.add('hidden');
-            init();
-        });
-
-        btnClearSettings.addEventListener('click', () => {
-            localStorage.removeItem('PRJ30_SUPABASE_URL');
-            localStorage.removeItem('PRJ30_SUPABASE_KEY');
-            settingsModal.classList.add('hidden');
-            init();
-        });
-
-        const QUEUE_CHANNEL = "cairo_tech_pwa_queue_78a1bc49df20";
-
-        // 2. Initialize App and Cloud Broker
+        // 1. Initialize
         async function init() {
-            const storedUrl = localStorage.getItem('PRJ30_SUPABASE_URL');
-            const storedKey = localStorage.getItem('PRJ30_SUPABASE_KEY');
-
-            if (storedUrl && storedKey && window.supabase) {
-                try {
-                    supabaseClient = window.supabase.createClient(storedUrl, storedKey);
-                    brokerMode = 'supabase';
-                    backendStatus.textContent = 'سحابي Supabase ☁️';
-                    backendStatus.style.borderColor = 'rgba(56, 189, 248, 0.4)';
-                    backendStatus.style.color = '#38bdf8';
-                } catch (e) {
-                    brokerMode = '4g-relay';
-                }
-            } else if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
                 brokerMode = 'local';
-                backendStatus.textContent = 'محلي LAN 🟢';
-                backendStatus.style.borderColor = 'rgba(16, 185, 129, 0.3)';
-                backendStatus.style.color = 'var(--emerald)';
+                backendStatusText.textContent = 'محلي LAN';
             } else {
                 brokerMode = '4g-relay';
-                backendStatus.textContent = 'سحابي 4G مباشر (Zero-Tunnel) 🟢';
-                backendStatus.style.borderColor = 'rgba(16, 185, 129, 0.4)';
-                backendStatus.style.color = 'var(--emerald)';
+                backendStatusText.textContent = '4G متصل';
             }
 
-            // Fetch machine catalog (local API or static fallback)
             try {
-                let data = null;
-                try {
-                    const res = await fetch('./machines.json');
-                    if (res.ok) {
-                        const staticMachines = await res.json();
-                        const sections = { ACACIA: new Set(), PALMIER: new Set() };
-                        staticMachines.forEach(m => {
-                            const b = (m.building || '').toUpperCase();
-                            if (sections[b]) {
-                                sections[b].add(m.section || m.area || 'عام');
-                            }
-                        });
-                        data = {
-                            machines: staticMachines,
-                            sections_by_site: {
-                                ACACIA: Array.from(sections.ACACIA),
-                                PALMIER: Array.from(sections.PALMIER)
-                            }
-                        };
+                let staticMachines = [];
+                const res = await fetch('./machines.json');
+                if (res.ok) {
+                    staticMachines = await res.json();
+                } else if (brokerMode === 'local') {
+                    const localRes = await fetch('/api/machines');
+                    if (localRes.ok) {
+                        const localData = await localRes.json();
+                        staticMachines = localData.machines || [];
                     }
-                } catch(e) {}
-
-                if (!data && brokerMode === 'local') {
-                    const res = await fetch('/api/machines');
-                    if (res.ok) data = await res.json();
                 }
-
-                allMachines = data.machines || [];
-                sectionsBySite = data.sections_by_site || {};
-                document.getElementById('machines-count').textContent = `${allMachines.length} ماكينة معتمدة`;
+                allMachines = staticMachines;
+                machinesCountEl.textContent = `${allMachines.length} ماكينة`;
+                renderMachines();
             } catch (e) {
-                backendStatus.textContent = 'خطأ بالتحميل 🔴';
-                backendStatus.style.borderColor = 'var(--red)';
-                backendStatus.style.color = 'var(--red)';
+                console.warn('Machines load error:', e);
+                machinesListEl.innerHTML = '<div style="text-align: center; color: var(--red); padding: 14px;">تعذر تحميل دليل الماكينات. يرجى التحديث.</div>';
             }
         }
 
-        // 3. Cascading selects
-        selectSite.addEventListener('change', () => {
-            const site = selectSite.value;
-            selectSection.innerHTML = '<option value="">-- اختر القسم --</option>';
-            selectMachine.innerHTML = '<option value="">-- اختر الماكينة --</option>';
-            selectMachine.disabled = true;
-            machineDetails.classList.add('hidden');
-            chatSection.classList.add('hidden');
-
-            if (!site || !sectionsBySite[site]) {
-                selectSection.disabled = true;
-                return;
-            }
-
-            sectionsBySite[site].forEach(sec => {
-                const opt = document.createElement('option');
-                opt.value = sec;
-                opt.textContent = sec;
-                selectSection.appendChild(opt);
-            });
-            selectSection.disabled = false;
-        });
-
-        selectSection.addEventListener('change', () => {
-            const site = selectSite.value;
-            const sec = selectSection.value;
-            selectMachine.innerHTML = '<option value="">-- اختر الماكينة للتشخيص --</option>';
-            machineDetails.classList.add('hidden');
-            chatSection.classList.add('hidden');
-
-            if (!sec) {
-                selectMachine.disabled = true;
-                return;
-            }
-
+        // 2. Render Filtered Machines
+        function renderMachines() {
+            const query = (machineSearchInput.value || '').trim().toLowerCase();
+            
             const filtered = allMachines.filter(m => {
-                const bldMatch = (m.building || '').toUpperCase() === site;
-                const secMatch = (m.section || '').toLowerCase() === sec.toLowerCase() || (m.area || '').toLowerCase() === sec.toLowerCase();
-                return bldMatch && secMatch;
+                const bld = (m.building || '').toUpperCase();
+                if (activeSiteFilter !== 'ALL' && bld !== activeSiteFilter) {
+                    return false;
+                }
+                if (!query) return true;
+                const matchName = (m.display_name || '').toLowerCase().includes(query);
+                const matchId = (m.id || '').toLowerCase().includes(query);
+                const matchMfg = (m.manufacturer || '').toLowerCase().includes(query);
+                const matchModel = (m.model || '').toLowerCase().includes(query);
+                const matchRoom = (m.room_no || '').toLowerCase().includes(query);
+                const matchSec = (m.section || '').toLowerCase().includes(query);
+                const matchJde = (m.jde_code || '').toLowerCase().includes(query);
+                return matchName || matchId || matchMfg || matchModel || matchRoom || matchSec || matchJde;
             });
 
-            filtered.forEach(m => {
-                const opt = document.createElement('option');
-                opt.value = m.id;
-                opt.textContent = m.display_name || m.id;
-                selectMachine.appendChild(opt);
-            });
-            selectMachine.disabled = false;
-        });
-
-        selectMachine.addEventListener('change', () => {
-            const machId = selectMachine.value;
-            if (!machId) {
-                machineDetails.classList.add('hidden');
-                chatSection.classList.add('hidden');
+            if (filtered.length === 0) {
+                machinesListEl.innerHTML = '<div style="text-align: center; color: #94a3b8; padding: 20px 0; font-size: 13px;">لا توجد ماكينات مطابقة للبحث.</div>';
                 return;
             }
 
-            selectedMachine = allMachines.find(m => m.id === machId);
-            if (selectedMachine) {
-                document.getElementById('det-id').textContent = selectedMachine.id;
-                document.getElementById('det-jde').textContent = selectedMachine.jde_code || 'N/A';
-                document.getElementById('det-model').textContent = `${selectedMachine.manufacturer || ''} ${selectedMachine.model || ''}`.trim() || 'N/A';
-                document.getElementById('det-room').textContent = selectedMachine.room_no || 'N/A';
-                machineDetails.classList.remove('hidden');
+            machinesListEl.innerHTML = '';
+            filtered.forEach(m => {
+                const item = document.createElement('div');
+                item.className = 'machine-item';
+                
+                const hasCatalog = !!m.notebook_id;
+                const catalogBadge = hasCatalog 
+                    ? '<span class="item-badge catalog">📖 كتالوج رسمي</span>' 
+                    : '';
 
-                // Reset chat
-                currentSessionId = null;
-                if (jobPollTimer) { clearInterval(jobPollTimer); jobPollTimer = null; }
+                const bldLabel = m.building ? (m.building === 'ACACIA' ? 'الأكاسيا' : 'البالميي') : 'عام';
+                const modelStr = `${m.manufacturer || ''} ${m.model || ''}`.trim();
+                const roomStr = m.room_no ? `غرفة ${m.room_no}` : '';
 
-                document.getElementById('chat-mach-name').textContent = selectedMachine.display_name || selectedMachine.id;
-                messagesArea.innerHTML = `
-                    <div class="message assistant">
-                        أدخل كود العطل أو الإنذار لماكينة <b>${selectedMachine.display_name || selectedMachine.id}</b>.
+                item.innerHTML = `
+                    <div class="item-head">
+                        <span class="item-name">${m.display_name || m.id}</span>
+                        ${catalogBadge}
+                    </div>
+                    <div class="item-meta">
+                        ${modelStr ? `<span>${modelStr}</span><span>•</span>` : ''}
+                        <span>${bldLabel}</span>
+                        ${roomStr ? `<span>•</span><span>${roomStr}</span>` : ''}
+                        ${m.section ? `<span>•</span><span>${m.section}</span>` : ''}
                     </div>
                 `;
-                sessionIdDisplay.textContent = 'جلسة: جديدة (تُنشأ مع أول سؤال)';
-                chatSection.classList.remove('hidden');
-                archiveBanner.classList.add('hidden');
-            }
+
+                item.addEventListener('click', () => selectMachine(m));
+                machinesListEl.appendChild(item);
+            });
+        }
+
+        // 3. Selection Handlers
+        function selectMachine(machine) {
+            selectedMachine = machine;
+            
+            // Populate Banner
+            bannerName.textContent = machine.display_name || machine.id;
+            bannerBld.textContent = machine.building ? (machine.building === 'ACACIA' ? 'مبنى الأكاسيا' : 'مبنى البالميي') : 'الموقع: عام';
+            bannerSec.textContent = machine.section || machine.area || 'القسم: عام';
+            bannerRoom.textContent = machine.room_no ? `غرفة ${machine.room_no}` : 'الغرفة: -';
+            bannerJde.textContent = machine.jde_code ? `JDE: ${machine.jde_code}` : 'JDE: -';
+
+            // Toggle visibility
+            machinePickerCard.classList.add('hidden');
+            selectedMachineBanner.classList.remove('hidden');
+            chatSection.classList.remove('hidden');
+            archiveBanner.classList.add('hidden');
+
+            // Reset chat
+            currentSessionId = null;
+            messagesArea.innerHTML = `
+                <div class="message assistant">
+                    أدخل كود العطل أو الإنذار لماكينة <b>${selectedMachine.display_name || selectedMachine.id}</b>.
+                </div>
+            `;
+            sessionIdDisplay.textContent = 'جلسة: جديدة (تُنشأ مع أول سؤال)';
+            
+            // Focus input smoothly
+            setTimeout(() => { queryInput.focus(); }, 150);
+        }
+
+        btnChangeMachine.addEventListener('click', () => {
+            selectedMachineBanner.classList.add('hidden');
+            machinePickerCard.classList.remove('hidden');
+            machineSearchInput.focus();
         });
 
-        // 4. Send Question to Diagnostic Engine
+        // Filter chips click
+        siteChips.forEach(chip => {
+            chip.addEventListener('click', () => {
+                siteChips.forEach(c => c.classList.remove('active'));
+                chip.classList.add('active');
+                activeSiteFilter = chip.dataset.site;
+                renderMachines();
+            });
+        });
+
+        // Search input
+        machineSearchInput.addEventListener('input', () => {
+            if (machineSearchInput.value.trim()) {
+                btnClearSearch.classList.remove('hidden');
+            } else {
+                btnClearSearch.classList.add('hidden');
+            }
+            renderMachines();
+        });
+
+        btnClearSearch.addEventListener('click', () => {
+            machineSearchInput.value = '';
+            btnClearSearch.classList.add('hidden');
+            renderMachines();
+            machineSearchInput.focus();
+        });
+
+        // 4. Send Query Workflow
         async function sendQuery() {
             const q = queryInput.value.trim();
             if (!q || !selectedMachine) return;
@@ -637,12 +796,10 @@
             btnSend.textContent = 'جاري الفحص... ⏳';
 
             if (brokerMode === '4g-relay') {
-                // Zero-Tunnel 4G Outbound Cloud Queue (SSE Streaming)
                 const jobId = 'job_' + Date.now().toString(36) + '_' + Math.random().toString(36).substr(2, 5);
                 currentSessionId = jobId;
                 sessionIdDisplay.textContent = `مهمة 4G: ${jobId}`;
 
-                // Add in-chat loading message
                 const loadingDiv = document.createElement('div');
                 const loadingId = 'loading-' + jobId;
                 loadingDiv.id = loadingId;
@@ -728,7 +885,7 @@
                         })
                     });
 
-                    // 3. Gentle single fallback poll after 45s (immunity to 429 rate limit)
+                    // 3. Fallback poll after 45s
                     window._fallbackTimer = setTimeout(async () => {
                         if (completed) return;
                         try {
@@ -753,62 +910,6 @@
                     const loadEl = document.getElementById(loadingId);
                     if (loadEl) loadEl.remove();
                     appendMessage('assistant', `⚠️ حدث خطأ أثناء إرسال الاستفسار: ${e.message}`);
-                    btnSend.disabled = false;
-                    btnSend.innerHTML = '<span>فحص العطل</span> 🔍';
-                }
-            } else if (brokerMode === 'supabase' && supabaseClient) {
-                // Cloud Broker Mode (Supabase)
-                try {
-                    const { data, error } = await supabaseClient.from('diagnostic_jobs').insert({
-                        machine_id: selectedMachine.id,
-                        query: q,
-                        technician_name: 'Technician PWA',
-                        status: 'pending'
-                    }).select().single();
-
-                    if (error || !data) throw new Error(error ? error.message : 'Failed to create job');
-
-                    currentSessionId = data.id;
-                    sessionIdDisplay.textContent = `مهمة سحابية: ${currentSessionId.slice(0, 8)}...`;
-
-                    // Listen via Realtime channel
-                    const channel = supabaseClient
-                        .channel(`job_${data.id}`)
-                        .on('postgres_changes', {
-                            event: 'UPDATE',
-                            schema: 'public',
-                            table: 'diagnostic_jobs',
-                            filter: `id=eq.${data.id}`
-                        }, (payload) => {
-                            if (payload.new && payload.new.status === 'completed') {
-                                cleanupAndRender(payload.new.solution, payload.new.suggested_parts);
-                            }
-                        })
-                        .subscribe();
-
-                    // Fallback polling every 1.5 seconds
-                    jobPollTimer = setInterval(async () => {
-                        const { data: polled } = await supabaseClient
-                            .from('diagnostic_jobs')
-                            .select('status, solution, suggested_parts')
-                            .eq('id', data.id)
-                            .single();
-
-                        if (polled && polled.status === 'completed') {
-                            cleanupAndRender(polled.solution, polled.suggested_parts);
-                        }
-                    }, 1500);
-
-                    function cleanupAndRender(solution, parts) {
-                        if (jobPollTimer) { clearInterval(jobPollTimer); jobPollTimer = null; }
-                        supabaseClient.removeChannel(channel);
-                        btnSend.disabled = false;
-                        btnSend.innerHTML = '<span>فحص العطل</span> 🔍';
-                        appendMessage('assistant', solution || 'لم يتم العثور على تشخيص مطابق لكود العطل المدخل.', parts);
-                    }
-
-                } catch (e) {
-                    appendMessage('assistant', `⚠️ حدث خطأ في وسيط السحابة: ${e.message}`);
                     btnSend.disabled = false;
                     btnSend.innerHTML = '<span>فحص العطل</span> 🔍';
                 }
@@ -858,7 +959,6 @@
             const msgDiv = document.createElement('div');
             msgDiv.className = `message ${role}`;
             
-            // Format complete markdown text safely preserving symbols and full character length
             const safe = escapeHtml(text || '');
             let formatted = safe
                 .replace(/\n/g, '<br>')
@@ -866,7 +966,7 @@
                 .replace(/\*(.*?)\*/g, '<i>$1</i>');
             msgDiv.innerHTML = formatted;
 
-            // Add full text copy button for diagnosis
+            // Full text copy button
             if (role === 'assistant' && text && text.length > 80) {
                 const actionRow = document.createElement('div');
                 actionRow.style.marginTop = '10px';
@@ -925,10 +1025,7 @@
 
         // 5. Close Session Workflow
         btnOpenCloseModal.addEventListener('click', () => {
-            if (!currentSessionId) {
-                alert('لم تبدأ جلسة بعد لحفظها.');
-                return;
-            }
+            closeNotes.value = '';
             closeModal.classList.remove('hidden');
         });
 
@@ -937,10 +1034,15 @@
         });
 
         btnConfirmClose.addEventListener('click', async () => {
-            if (!currentSessionId) return;
+            if (!currentSessionId) {
+                closeModal.classList.add('hidden');
+                chatSection.classList.add('hidden');
+                return;
+            }
+
             const notes = closeNotes.value.trim();
             btnConfirmClose.disabled = true;
-            btnConfirmClose.textContent = 'جاري الحفظ والتطهير...';
+            btnConfirmClose.textContent = 'جاري الحفظ والأرشفة... ⏳';
 
             if (brokerMode === '4g-relay') {
                 try {
@@ -948,37 +1050,19 @@
                         method: 'POST',
                         body: JSON.stringify({
                             job_id: currentSessionId,
-                            machine_id: selectedMachine.id,
-                            technician_notes: notes || 'تم حل العطل وإغلاق الجلسة بواسطة الفني عبر 4G.',
-                            status: 'closed',
-                            solution: 'Incident resolved.'
+                            machine_id: selectedMachine ? selectedMachine.id : 'UNKNOWN',
+                            technician_name: 'Technician (4G)',
+                            technician_notes: notes || 'تم حل العطل وإغلاق الجلسة بواسطة الفني عبر شريحة 4G.',
+                            status: 'closed'
                         })
                     });
                     closeModal.classList.add('hidden');
                     chatSection.classList.add('hidden');
-                    archiveSummaryText.textContent = `تم تسجيل إغلاق المهمة السحابية بنجاح (${currentSessionId}). قام عامل السيرفر بأرشفتها وتطهير الجلسة.`;
+                    archiveSummaryText.textContent = `تم تسجيل إغلاق المهمة بنجاح (${currentSessionId}). قام عامل السيرفر بأرشفتها وتطهير الجلسة.`;
                     archiveBanner.classList.remove('hidden');
                     currentSessionId = null;
                 } catch(e) {
                     alert(`خطأ أثناء إغلاق الجلسة: ${e.message}`);
-                } finally {
-                    btnConfirmClose.disabled = false;
-                    btnConfirmClose.textContent = 'تأكيد وحفظ الملخص';
-                }
-            } else if (brokerMode === 'supabase' && supabaseClient) {
-                try {
-                    await supabaseClient.from('diagnostic_jobs').update({
-                        status: 'closed',
-                        technician_notes: notes || 'تم حل العطل واغلاق الجلسة بواسطة الفني عبر الـ PWA.'
-                    }).eq('id', currentSessionId);
-
-                    closeModal.classList.add('hidden');
-                    chatSection.classList.add('hidden');
-                    archiveSummaryText.textContent = `تم تسجيل إغلاق المهمة السحابية بنجاح (${currentSessionId.slice(0, 8)}). سيقوم عامل السيرفر بأرشفتها ذاتياً وتطهيرها.`;
-                    archiveBanner.classList.remove('hidden');
-                    currentSessionId = null;
-                } catch (e) {
-                    alert(`خطأ أثناء إغلاق الجلسة السحابية: ${e.message}`);
                 } finally {
                     btnConfirmClose.disabled = false;
                     btnConfirmClose.textContent = 'تأكيد وحفظ الملخص';
@@ -996,8 +1080,7 @@
                     const data = await res.json();
                     closeModal.classList.add('hidden');
                     chatSection.classList.add('hidden');
-
-                    archiveSummaryText.textContent = data.summary || 'تم تسجيل حل العطل بنجاح.';
+                    archiveSummaryText.textContent = data.summary || 'تم تسجيل الحل وتطهير رسائل الشات بنجاح.';
                     archiveBanner.classList.remove('hidden');
                     currentSessionId = null;
                 } catch (e) {
@@ -1009,6 +1092,18 @@
             }
         });
 
+        // 6. Register Service Worker (v2)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').then((reg) => {
+                    console.log('SW registered:', reg.scope);
+                }).catch((err) => {
+                    console.warn('SW registration failed:', err);
+                });
+            });
+        }
+
+        // Start App
         init();
     </script>
 </body>
