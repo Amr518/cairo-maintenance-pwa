@@ -1,9 +1,13 @@
-const CACHE_NAME = 'maintenance-pwa-v5';
+const CACHE_NAME = 'maintenance-pwa-v6';
 const ASSETS = [
   './',
   './index.html',
   './manifest.webmanifest',
-  './machines.json'
+  './machines.json',
+  './logo-white.png',
+  './icon-180.png',
+  './icon-192.png',
+  './icon-512.png'
 ];
 
 self.addEventListener('install', (e) => {

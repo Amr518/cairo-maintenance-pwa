@@ -3,72 +3,111 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>منظومة الصيانة الذكية | Maintenance Core PWA</title>
+    <title>منظومة الصيانة الذكية | Servier Maintenance Core</title>
     <link rel="manifest" href="manifest.webmanifest">
-    <meta name="theme-color" content="#090d16">
+    <link rel="apple-touch-icon" href="icon-180.png">
+    <link rel="icon" href="icon-192.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="صيانة Servier">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#242269">
     <style>
         :root {
-            --primary: #2563eb;
-            --primary-hover: #1d4ed8;
-            --emerald: #10b981;
-            --amber: #f59e0b;
-            --red: #ef4444;
-            --slate-900: #0f172a;
-            --slate-800: #1e293b;
-            --slate-700: #334155;
-            --slate-600: #475569;
-            --slate-200: #e2e8f0;
-            --slate-100: #f1f5f9;
+            --navy: #242269;
+            --coral: #F55B41;
+            --green: #91C361;
+            --blue: #323C8E;
+            --purple: #9B7DCD;
+            --gold: #FDC300;
+            --lblue: #D3DEF2;
+            --cyan: #47BFD9;
+            --alt: #F4F5FA;
+            --line: #dfe2ec;
+            --ink: #1d1d2b;
+            --muted: #6b6f86;
+            --red: #D9534F;
         }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        html, body { margin: 0; min-height: 100%; }
         
         body {
-            background-color: #090d16;
-            background-image: radial-gradient(ellipse at 50% 0%, rgba(30, 58, 138, 0.22) 0%, rgba(9, 13, 22, 1) 75%);
-            background-attachment: fixed;
-            color: var(--slate-100);
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Cairo", Tahoma, sans-serif;
-            margin: 0;
-            padding: 0;
-            min-height: 100vh;
+            font-family: "Century Gothic", "CenturyGothic", "AppleGothic", "Futura", "Segoe UI", Tahoma, sans-serif;
+            background: var(--alt);
+            color: var(--ink);
+            font-size: 15px;
             display: flex;
             flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            background: var(--navy);
+            color: #fff;
+            padding: calc(10px + env(safe-area-inset-top)) 16px 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-top: 5px solid var(--coral);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            box-shadow: 0 2px 10px rgba(36, 34, 105, 0.15);
+        }
+        header h1 {
+            font-size: 17px;
+            margin: 0;
+            flex: 1;
+            font-weight: 700;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            color: #fff;
+        }
+        header small {
+            display: block;
+            font-size: 11.5px;
+            color: var(--lblue);
+            font-weight: 400;
+        }
+        header img {
+            height: 24px;
+            width: auto;
+            display: block;
         }
 
         main {
             flex: 1;
-            max-width: 650px;
+            max-width: 720px;
             width: 100%;
             margin: 0 auto;
-            padding: 16px 14px 32px;
+            padding: 14px 14px calc(32px + env(safe-area-inset-bottom));
             display: flex;
             flex-direction: column;
-            gap: 14px;
+            gap: 12px;
         }
 
         .card {
-            background: var(--slate-800);
-            border: 1px solid var(--slate-700);
+            background: #fff;
+            border: 1px solid var(--line);
             border-radius: 14px;
-            padding: 16px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+            padding: 14px;
+            box-shadow: 0 2px 8px rgba(36, 34, 105, 0.04);
         }
 
         .card-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 14px;
+            margin-bottom: 12px;
             padding-bottom: 10px;
-            border-bottom: 1px solid rgba(51, 65, 85, 0.6);
+            border-bottom: 1px solid var(--line);
         }
 
         .card-title {
             font-size: 15px;
             font-weight: 700;
-            color: #38bdf8;
+            color: var(--navy);
             margin: 0;
             display: flex;
             align-items: center;
@@ -76,13 +115,13 @@
         }
 
         .badge-live {
-            background: rgba(16, 185, 129, 0.15);
-            color: var(--emerald);
-            border: 1px solid rgba(16, 185, 129, 0.3);
+            background: var(--lblue);
+            color: var(--navy);
+            border: 1px solid rgba(50, 60, 142, 0.2);
             font-size: 11px;
             padding: 3px 10px;
-            border-radius: 999px;
-            font-weight: 600;
+            border-radius: 10px;
+            font-weight: 700;
         }
 
         .form-row {
@@ -104,49 +143,50 @@
 
         label {
             display: block;
-            font-size: 12px;
-            color: #94a3b8;
+            font-size: 13px;
+            color: var(--navy);
             margin-bottom: 6px;
-            font-weight: 600;
+            font-weight: 700;
         }
 
         /* Custom Mobile Select Trigger */
         .custom-select-trigger {
-            background: var(--slate-900);
-            border: 1px solid var(--slate-700);
+            background: #fff;
+            border: 1px solid #c5cbe0;
             border-radius: 10px;
-            padding: 12px 14px;
-            color: #f1f5f9;
-            font-size: 13.5px;
+            padding: 11px 13px;
+            color: var(--ink);
+            font-size: 14.5px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             cursor: pointer;
             user-select: none;
             transition: all 0.15s ease;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+            box-shadow: 0 1px 2px rgba(36, 34, 105, 0.04);
         }
         .custom-select-trigger:active {
-            border-color: #38bdf8;
-            background: #172554;
+            border-color: var(--coral);
+            background: var(--alt);
         }
         .custom-select-trigger.disabled {
             opacity: 0.45;
             cursor: not-allowed;
-            background: rgba(15, 23, 42, 0.4);
-            border-color: rgba(51, 65, 85, 0.4);
+            background: #f8f9fa;
+            border-color: var(--line);
         }
         .custom-select-trigger .arrow {
-            color: #94a3b8;
+            color: var(--muted);
             font-size: 12px;
             margin-right: 6px;
         }
 
         /* Machine Details Box */
         .machine-info {
-            background: rgba(15, 23, 42, 0.7);
-            border: 1px solid var(--slate-700);
-            border-radius: 10px;
+            background: #fff;
+            border: 1px solid var(--line);
+            border-inline-start: 5px solid var(--coral);
+            border-radius: 12px;
             padding: 12px 14px;
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -155,14 +195,15 @@
         }
         .info-cell b {
             display: block;
-            font-size: 10.5px;
-            color: #94a3b8;
+            font-size: 11px;
+            color: var(--muted);
             margin-bottom: 2px;
+            font-weight: 700;
         }
         .info-cell span {
-            font-size: 12.5px;
-            font-weight: 600;
-            color: #f1f5f9;
+            font-size: 13.5px;
+            font-weight: 700;
+            color: var(--navy);
             word-break: break-all;
         }
 
@@ -174,41 +215,43 @@
             flex: 1;
         }
         .messages-area {
-            background: rgba(15, 23, 42, 0.75);
-            border: 1px solid var(--slate-700);
+            background: var(--alt);
+            border: 1px solid var(--line);
             border-radius: 12px;
             padding: 12px;
             min-height: 250px;
-            max-height: 65vh;
+            max-height: 60vh;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
         }
         .message {
             max-width: 95%;
             padding: 12px 14px;
             border-radius: 14px;
-            font-size: 13.5px;
+            font-size: 14px;
             line-height: 1.6;
             word-wrap: break-word;
         }
         .message.user {
             align-self: flex-start;
-            background: var(--primary);
+            background: var(--navy);
             color: #fff;
             border-bottom-right-radius: 4px;
         }
         .message.assistant {
             align-self: flex-end;
-            background: var(--slate-800);
-            color: var(--slate-100);
-            border: 1px solid var(--slate-700);
+            background: #fff;
+            color: var(--ink);
+            border: 1px solid var(--line);
+            border-inline-start: 4px solid var(--coral);
             border-bottom-left-radius: 4px;
+            box-shadow: 0 1px 4px rgba(36, 34, 105, 0.05);
         }
         .message .msg-meta {
-            font-size: 10px;
-            opacity: 0.7;
+            font-size: 10.5px;
+            color: var(--muted);
             margin-top: 4px;
             text-align: left;
         }
@@ -219,23 +262,23 @@
             gap: 6px;
         }
         .part-chip {
-            background: rgba(30, 41, 59, 0.9);
-            border: 1px solid rgba(56, 189, 248, 0.3);
-            border-radius: 6px;
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: 8px;
             padding: 6px 10px;
-            font-size: 11.5px;
+            font-size: 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
         .stock-tag {
-            font-size: 10px;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-weight: bold;
+            font-size: 10.5px;
+            padding: 2px 7px;
+            border-radius: 6px;
+            font-weight: 700;
         }
-        .stock-tag.in { background: rgba(16, 185, 129, 0.2); color: var(--emerald); }
-        .stock-tag.out { background: rgba(239, 68, 68, 0.2); color: var(--red); }
+        .stock-tag.in { background: #EBF1DE; color: #4F6228; }
+        .stock-tag.out { background: #FDE9D9; color: var(--red); }
 
         /* Input Controls */
         .chat-input-bar {
@@ -244,28 +287,26 @@
         }
         .chat-input-bar input {
             flex: 1;
-            background: var(--slate-900);
-            border: 1px solid var(--slate-700);
+            background: #fff;
+            border: 1px solid #c5cbe0;
             border-radius: 10px;
-            padding: 11px 14px;
-            color: #fff;
-            font-size: 14px;
+            padding: 11px 13px;
+            color: var(--ink);
+            font-size: 14.5px;
             font-family: inherit;
         }
         .chat-input-bar input:focus {
             outline: none;
-            border-color: #38bdf8;
-            box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+            border-color: var(--navy);
+            box-shadow: 0 0 0 2px rgba(36, 34, 105, 0.12);
         }
 
         .btn {
-            background: var(--primary);
-            color: #fff;
-            border: none;
-            border-radius: 10px;
-            padding: 10px 18px;
-            font-size: 13.5px;
-            font-weight: bold;
+            border: 0;
+            border-radius: 12px;
+            padding: 11px 16px;
+            font-size: 14px;
+            font-weight: 700;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -273,10 +314,12 @@
             gap: 6px;
             transition: all 0.15s ease;
         }
-        .btn:hover { background: var(--primary-hover); }
+        .btn.main { background: var(--coral); color: #fff; }
+        .btn.navy { background: var(--navy); color: #fff; }
+        .btn.ghost { background: #fff; color: var(--navy); border: 1px solid #c5cbe0; }
+        .btn.green { background: var(--green); color: #fff; }
+        .btn:hover { opacity: 0.92; }
         .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        .btn.btn-emerald { background: var(--emerald); }
-        .btn.btn-emerald:hover { background: #059669; }
 
         .session-actions {
             display: flex;
@@ -285,15 +328,15 @@
             padding-top: 6px;
         }
         .session-badge {
-            font-size: 11px;
-            color: #94a3b8;
+            font-size: 11.5px;
+            color: var(--muted);
         }
 
         /* Modal Overlay */
         .modal-overlay {
             position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0, 0, 0, 0.75);
+            inset: 0;
+            background: rgba(20, 20, 60, 0.55);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -301,27 +344,32 @@
             padding: 16px;
         }
         .modal {
-            background: var(--slate-800);
-            border: 1px solid var(--slate-700);
-            border-radius: 14px;
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: 18px;
             max-width: 480px;
             width: 100%;
             padding: 18px;
+            box-shadow: 0 10px 30px rgba(20, 20, 60, 0.2);
         }
         .modal h3 {
             margin: 0 0 10px;
             font-size: 16px;
-            color: #38bdf8;
+            color: var(--navy);
         }
         .modal textarea {
             width: 100%;
-            background: var(--slate-900);
-            border: 1px solid var(--slate-700);
+            background: #fff;
+            border: 1px solid #c5cbe0;
             border-radius: 8px;
             padding: 10px 12px;
-            color: #fff;
-            font-size: 13.5px;
+            color: var(--ink);
+            font-size: 14px;
             font-family: inherit;
+        }
+        .modal textarea:focus {
+            outline: none;
+            border-color: var(--navy);
         }
         .modal-buttons {
             display: flex;
@@ -330,13 +378,13 @@
             margin-top: 14px;
         }
 
-        /* Themed Android-Friendly Bottom Sheet Picker */
+        /* Themed Mobile Bottom Sheet Picker Component (Servier Identity) */
         .sheet-overlay {
             position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0, 0, 0, 0.75);
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
+            inset: 0;
+            background: rgba(20, 20, 60, 0.55);
+            backdrop-filter: blur(2px);
+            -webkit-backdrop-filter: blur(2px);
             z-index: 100;
             display: flex;
             flex-direction: column;
@@ -344,13 +392,13 @@
             animation: fadeIn 0.15s ease;
         }
         .sheet-container {
-            background: #1e293b;
-            border-top: 1px solid #475569;
-            border-radius: 20px 20px 0 0;
-            max-height: 80vh;
+            background: #fff;
+            border-radius: 18px 18px 0 0;
+            border-top: 5px solid var(--coral);
+            max-height: 82vh;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 -8px 24px rgba(20, 20, 60, 0.25);
             animation: slideUp 0.22s cubic-bezier(0.16, 1, 0.3, 1);
         }
         @keyframes slideUp {
@@ -364,7 +412,7 @@
         .sheet-handle {
             width: 38px;
             height: 4px;
-            background: #475569;
+            background: #c5cbe0;
             border-radius: 999px;
             margin: 10px auto 4px;
         }
@@ -372,19 +420,19 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px 18px;
-            border-bottom: 1px solid #334155;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--line);
         }
         .sheet-title {
             font-size: 15px;
             font-weight: 700;
-            color: #38bdf8;
+            color: var(--navy);
             margin: 0;
         }
         .sheet-close {
-            background: rgba(51, 65, 85, 0.6);
-            border: none;
-            color: #94a3b8;
+            background: var(--alt);
+            border: 1px solid var(--line);
+            color: var(--muted);
             width: 28px;
             height: 28px;
             border-radius: 50%;
@@ -395,61 +443,68 @@
             cursor: pointer;
         }
         .sheet-search {
-            padding: 10px 16px;
-            border-bottom: 1px solid #334155;
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--line);
+            background: var(--alt);
         }
         .sheet-search input {
             width: 100%;
-            background: #0f172a;
-            border: 1px solid #334155;
+            background: #fff;
+            border: 1px solid #c5cbe0;
             border-radius: 8px;
             padding: 9px 12px;
-            color: #fff;
-            font-size: 13.5px;
+            color: var(--ink);
+            font-size: 14px;
             font-family: inherit;
         }
         .sheet-search input:focus {
             outline: none;
-            border-color: #38bdf8;
+            border-color: var(--navy);
         }
         .sheet-body {
             overflow-y: auto;
-            padding: 8px 12px 24px;
+            padding: 6px 10px 24px;
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 2px;
             -webkit-overflow-scrolling: touch;
         }
         .sheet-item {
-            padding: 13px 14px;
+            padding: 12px 14px;
             border-radius: 10px;
-            color: #f1f5f9;
+            color: var(--ink);
             font-size: 14px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             cursor: pointer;
             background: transparent;
+            border-bottom: 1px solid rgba(223, 226, 236, 0.6);
             transition: background 0.1s ease;
         }
         .sheet-item:active {
-            background: #334155;
+            background: var(--alt);
         }
         .sheet-item.selected {
-            background: rgba(56, 189, 248, 0.15);
-            color: #38bdf8;
-            font-weight: 600;
+            background: var(--lblue);
+            color: var(--navy);
+            font-weight: 700;
         }
         .sheet-item .check {
-            color: #38bdf8;
-            font-weight: bold;
-            font-size: 14px;
+            color: var(--coral);
+            font-weight: 700;
+            font-size: 15px;
         }
 
         .hidden { display: none !important; }
     </style>
 </head>
 <body>
+    <header>
+        <h1>منظومة الصيانة الذكية<small id="who">Servier Egypt</small></h1>
+        <img src="logo-white.png" alt="Servier" style="height:24px;width:auto">
+    </header>
+
     <main>
         <!-- 1. Machine Selection Card -->
         <div class="card">
@@ -517,24 +572,24 @@
 
             <div class="chat-input-bar">
                 <input type="text" id="query-input" placeholder="اكتب كود العطل أو الإنذار (مثال: 501, heating, sensor)..." />
-                <button id="btn-send" class="btn">
+                <button id="btn-send" class="btn main">
                     <span>فحص العطل</span> 🔍
                 </button>
             </div>
 
             <div class="session-actions">
                 <span id="session-id-display" class="session-badge">جلسة: غير محددة</span>
-                <button id="btn-open-close-modal" class="btn btn-emerald" style="padding: 6px 12px; font-size: 12px;">
+                <button id="btn-open-close-modal" class="btn green" style="padding: 6px 12px; font-size: 12px;">
                     ✅ تم حل العطل وإغلاق الشات
                 </button>
             </div>
         </div>
 
         <!-- 3. Closed Session Summary Confirmation Banner -->
-        <div id="archive-banner" class="card hidden" style="border-color: var(--emerald); background: rgba(16, 185, 129, 0.08);">
-            <h3 style="color: var(--emerald); margin: 0 0 6px; font-size: 14px;">✅ تم إغلاق الجلسة وتطهير الذاكرة</h3>
-            <p id="archive-summary-text" style="font-size: 12px; color: #cbd5e1; margin: 0; line-height: 1.5;"></p>
-            <p style="font-size: 11px; color: #94a3b8; margin: 6px 0 0;">تم حفظ الملخص الهندسي فقط في سجل أرشفة الماكينة ومسح رسائل الشات المؤقتة من الذاكرة لضمان الخصوصية وسرعة الأداء.</p>
+        <div id="archive-banner" class="card hidden" style="border-color: var(--green); background: #F5FAEE; border-inline-start: 5px solid var(--green);">
+            <h3 style="color: #4F6228; margin: 0 0 6px; font-size: 14px;">✅ تم إغلاق الجلسة وتطهير الذاكرة</h3>
+            <p id="archive-summary-text" style="font-size: 13px; color: var(--ink); margin: 0; line-height: 1.5;"></p>
+            <p style="font-size: 11.5px; color: var(--muted); margin: 6px 0 0;">تم حفظ الملخص الهندسي فقط في سجل أرشفة الماكينة ومسح رسائل الشات المؤقتة من الذاكرة لضمان الخصوصية وسرعة الأداء.</p>
         </div>
     </main>
 
@@ -542,14 +597,14 @@
     <div id="close-modal" class="modal-overlay hidden">
         <div class="modal">
             <h3>اعتماد الحل وإغلاق الجلسة</h3>
-            <p style="font-size: 12px; color: #94a3b8; margin: 0 0 10px;">
+            <p style="font-size: 12.5px; color: var(--muted); margin: 0 0 10px;">
                 سيتم استخراج ملخص هندسي وحفظه في سجل أعطال الماكينة، ومسح المحادثة المؤقتة نهائياً من الذاكرة.
             </p>
             <label for="close-notes">إيه الإجراء أو الحل اللي تم تطبيقه؟ (اختياري):</label>
             <textarea id="close-notes" rows="3" placeholder="مثال: تم تنظيف الحساس وتغيير الريلاي واشتغلت الماكينة طبيعي..."></textarea>
             <div class="modal-buttons">
-                <button id="btn-cancel-modal" class="btn" style="background: var(--slate-700);">إلغاء</button>
-                <button id="btn-confirm-close" class="btn btn-emerald">تأكيد وحفظ الملخص</button>
+                <button id="btn-cancel-modal" class="btn ghost">إلغاء</button>
+                <button id="btn-confirm-close" class="btn green">تأكيد وحفظ الملخص</button>
             </div>
         </div>
     </div>
@@ -723,7 +778,7 @@
             });
 
             if (items.length === 0) {
-                sheetItemsList.innerHTML = '<div style="text-align: center; color: #94a3b8; padding: 24px 0; font-size: 13px;">لا توجد خيارات مطابقة.</div>';
+                sheetItemsList.innerHTML = '<div style="text-align: center; color: var(--muted); padding: 24px 0; font-size: 13px;">لا توجد خيارات مطابقة.</div>';
                 return;
             }
 
@@ -734,7 +789,7 @@
                 row.innerHTML = `
                     <div>
                         <div>${item.label}</div>
-                        ${item.subtext ? `<div style="font-size: 11px; color: #94a3b8; margin-top: 2px;">${item.subtext}</div>` : ''}
+                        ${item.subtext ? `<div style="font-size: 11px; color: var(--muted); margin-top: 2px;">${item.subtext}</div>` : ''}
                     </div>
                     ${item.selected ? '<span class="check">✓</span>' : ''}
                 `;
@@ -844,13 +899,13 @@
                 const loadingId = 'loading-' + jobId;
                 loadingDiv.id = loadingId;
                 loadingDiv.className = 'message assistant';
-                loadingDiv.style.borderStyle = 'dashed';
+                loadingDiv.style.border = '1px dashed var(--coral)';
                 loadingDiv.innerHTML = `
                     <div style="display: flex; align-items: center; gap: 8px;">
                         <span>⏳</span>
                         <div>
-                            <b>جاري استخراج البيانات الفنية...</b><br>
-                            <span id="load-status-${jobId}" style="font-size: 11.5px; color: #94a3b8;">مطابقة كود العطل ومراجعة خطوات الإصلاح المعتمدة</span>
+                            <b style="color: var(--navy);">جاري استخراج البيانات الفنية...</b><br>
+                            <span id="load-status-${jobId}" style="font-size: 11.5px; color: var(--muted);">مطابقة كود العطل ومراجعة خطوات الإصلاح المعتمدة</span>
                         </div>
                     </div>
                 `;
@@ -1007,12 +1062,9 @@
                 actionRow.style.alignItems = 'center';
 
                 const copyBtn = document.createElement('button');
-                copyBtn.className = 'btn';
+                copyBtn.className = 'btn ghost';
                 copyBtn.style.padding = '4px 10px';
-                copyBtn.style.fontSize = '11px';
-                copyBtn.style.background = 'var(--slate-700)';
-                copyBtn.style.color = '#38bdf8';
-                copyBtn.style.border = '1px solid var(--slate-600)';
+                copyBtn.style.fontSize = '12px';
                 copyBtn.innerHTML = '📋 نسخ البيانات الفنية';
                 copyBtn.onclick = () => {
                     navigator.clipboard.writeText(text).then(() => {
@@ -1029,7 +1081,7 @@
             if (parts && parts.length > 0) {
                 const partsDiv = document.createElement('div');
                 partsDiv.className = 'parts-grid';
-                partsDiv.innerHTML = '<div style="font-size: 11px; font-weight: bold; color: #38bdf8; margin-top: 6px;">⚙️ قطع الغيار المرتبطة بالعطل:</div>';
+                partsDiv.innerHTML = '<div style="font-size: 11.5px; font-weight: bold; color: var(--navy); margin-top: 6px;">⚙️ قطع الغيار المرتبطة بالعطل:</div>';
 
                 parts.forEach(p => {
                     const chip = document.createElement('div');
@@ -1038,7 +1090,7 @@
                     const stockClass = qty > 0 ? 'in' : 'out';
                     const stockLabel = qty > 0 ? `متوفر (${qty})` : 'غير متوفر';
                     chip.innerHTML = `
-                        <span>${p.name_en || p.name || 'Part'} <small style="color:#94a3b8">(${p.code_hint || p.code || 'N/A'})</small></span>
+                        <span>${p.name_en || p.name || 'Part'} <small style="color:var(--muted)">(${p.code_hint || p.code || 'N/A'})</small></span>
                         <span class="stock-tag ${stockClass}">${stockLabel}</span>
                     `;
                     partsDiv.appendChild(chip);
