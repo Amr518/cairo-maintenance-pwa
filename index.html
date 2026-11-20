@@ -697,18 +697,32 @@
                     appendMessage('assistant', solution || 'لا يوجد رد في الكتالوج.', parts);
                 }
 
+                async function extractPayload(item) {
+                    if (!item) return null;
+                    if (item.attachment && item.attachment.url) {
+                        try {
+                            const attachRes = await fetch(item.attachment.url);
+                            if (attachRes.ok) return await attachRes.json();
+                        } catch(e) { console.warn('Error reading attachment:', e); }
+                    }
+                    if (item.message) {
+                        try {
+                            return JSON.parse(item.message);
+                        } catch(e) {}
+                    }
+                    return null;
+                }
+
                 try {
                     // 1. Establish SSE stream listener FIRST so zero messages are missed
                     const es = new EventSource(`https://ntfy.sh/${resChannel}/sse`);
                     window._currentES = es;
-                    es.onmessage = (e) => {
+                    es.onmessage = async (e) => {
                         try {
                             const parsed = JSON.parse(e.data);
-                            if (parsed.message) {
-                                const inner = JSON.parse(parsed.message);
-                                if (inner.status === 'completed') {
-                                    handleDone(inner.solution, inner.suggested_parts);
-                                }
+                            const inner = await extractPayload(parsed);
+                            if (inner && inner.status === 'completed') {
+                                handleDone(inner.solution, inner.suggested_parts);
                             }
                         } catch(err) {}
                     };
@@ -738,12 +752,10 @@
                                 const lines = text.trim().split('\n').filter(Boolean);
                                 for (const line of lines) {
                                     const item = JSON.parse(line);
-                                    if (item.message) {
-                                        const inner = JSON.parse(item.message);
-                                        if (inner.status === 'completed') {
-                                            handleDone(inner.solution, inner.suggested_parts);
-                                            break;
-                                        }
+                                    const inner = await extractPayload(item);
+                                    if (inner && inner.status === 'completed') {
+                                        handleDone(inner.solution, inner.suggested_parts);
+                                        break;
                                     }
                                 }
                             }
