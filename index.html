@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>منظومة الصيانة الذكية | Maintenance Core PWA</title>
     <link rel="manifest" href="manifest.webmanifest">
-    <meta name="theme-color" content="#0f172a">
+    <meta name="theme-color" content="#090d16">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <style>
@@ -23,104 +23,147 @@
             --slate-100: #f1f5f9;
         }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
         body {
-            background-color: var(--slate-900);
+            background-color: #090d16;
+            background-image: radial-gradient(ellipse at 50% 0%, rgba(30, 58, 138, 0.22) 0%, rgba(9, 13, 22, 1) 75%);
+            background-attachment: fixed;
             color: var(--slate-100);
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Tahoma, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Cairo", Tahoma, sans-serif;
             margin: 0;
             padding: 0;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
         }
-        .badge-live {
-            background: rgba(16, 185, 129, 0.15);
-            color: var(--emerald);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-            font-size: 11px;
-            padding: 3px 8px;
-            border-radius: 999px;
-            font-weight: bold;
-        }
+
         main {
             flex: 1;
-            max-width: 800px;
+            max-width: 650px;
             width: 100%;
             margin: 0 auto;
-            padding: 14px 14px 24px;
+            padding: 16px 14px 32px;
             display: flex;
             flex-direction: column;
             gap: 14px;
         }
+
         .card {
             background: var(--slate-800);
             border: 1px solid var(--slate-700);
-            border-radius: 12px;
-            padding: 14px;
+            border-radius: 14px;
+            padding: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
         }
+
         .card-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
+            margin-bottom: 14px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(51, 65, 85, 0.6);
         }
+
         .card-title {
-            font-size: 14px;
-            font-weight: bold;
+            font-size: 15px;
+            font-weight: 700;
             color: #38bdf8;
             margin: 0;
             display: flex;
             align-items: center;
             gap: 6px;
         }
+
+        .badge-live {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--emerald);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            font-size: 11px;
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-weight: 600;
+        }
+
         .form-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 10px;
+            gap: 12px;
+            margin-bottom: 12px;
         }
         @media (max-width: 540px) {
             .form-row { grid-template-columns: 1fr; }
         }
+
+        .select-group {
+            margin-bottom: 12px;
+        }
+        .select-group:last-child {
+            margin-bottom: 0;
+        }
+
         label {
             display: block;
             font-size: 12px;
             color: #94a3b8;
-            margin-bottom: 4px;
-            font-weight: 500;
+            margin-bottom: 6px;
+            font-weight: 600;
         }
-        select, input, textarea {
-            width: 100%;
+
+        /* Custom Mobile Select Trigger */
+        .custom-select-trigger {
             background: var(--slate-900);
             border: 1px solid var(--slate-700);
-            border-radius: 8px;
-            padding: 9px 12px;
-            color: #fff;
-            font-size: 14px;
-            font-family: inherit;
-        }
-        select:focus, input:focus, textarea:focus {
-            outline: none;
-            border-color: #38bdf8;
-        }
-        .machine-info {
-            background: rgba(15, 23, 42, 0.6);
-            border-radius: 8px;
-            padding: 10px;
-            font-size: 12px;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-            gap: 8px;
-            border: 1px dashed var(--slate-700);
-        }
-        .machine-info div b {
-            color: #94a3b8;
-            display: block;
-            font-size: 10px;
-        }
-        .machine-info div span {
+            border-radius: 10px;
+            padding: 12px 14px;
             color: #f1f5f9;
+            font-size: 13.5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.15s ease;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+        .custom-select-trigger:active {
+            border-color: #38bdf8;
+            background: #172554;
+        }
+        .custom-select-trigger.disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+            background: rgba(15, 23, 42, 0.4);
+            border-color: rgba(51, 65, 85, 0.4);
+        }
+        .custom-select-trigger .arrow {
+            color: #94a3b8;
+            font-size: 12px;
+            margin-right: 6px;
+        }
+
+        /* Machine Details Box */
+        .machine-info {
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid var(--slate-700);
+            border-radius: 10px;
+            padding: 12px 14px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 14px;
+        }
+        .info-cell b {
+            display: block;
+            font-size: 10.5px;
+            color: #94a3b8;
+            margin-bottom: 2px;
+        }
+        .info-cell span {
+            font-size: 12.5px;
             font-weight: 600;
+            color: #f1f5f9;
+            word-break: break-all;
         }
 
         /* Chat Console */
@@ -131,7 +174,7 @@
             flex: 1;
         }
         .messages-area {
-            background: rgba(15, 23, 42, 0.7);
+            background: rgba(15, 23, 42, 0.75);
             border: 1px solid var(--slate-700);
             border-radius: 12px;
             padding: 12px;
@@ -169,6 +212,7 @@
             margin-top: 4px;
             text-align: left;
         }
+
         .parts-grid {
             margin-top: 8px;
             display: grid;
@@ -198,11 +242,27 @@
             display: flex;
             gap: 8px;
         }
+        .chat-input-bar input {
+            flex: 1;
+            background: var(--slate-900);
+            border: 1px solid var(--slate-700);
+            border-radius: 10px;
+            padding: 11px 14px;
+            color: #fff;
+            font-size: 14px;
+            font-family: inherit;
+        }
+        .chat-input-bar input:focus {
+            outline: none;
+            border-color: #38bdf8;
+            box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+        }
+
         .btn {
             background: var(--primary);
             color: #fff;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             padding: 10px 18px;
             font-size: 13.5px;
             font-weight: bold;
@@ -211,12 +271,12 @@
             align-items: center;
             justify-content: center;
             gap: 6px;
+            transition: all 0.15s ease;
         }
         .btn:hover { background: var(--primary-hover); }
         .btn:disabled { opacity: 0.5; cursor: not-allowed; }
         .btn.btn-emerald { background: var(--emerald); }
         .btn.btn-emerald:hover { background: #059669; }
-        .btn.btn-red { background: var(--red); }
 
         .session-actions {
             display: flex;
@@ -229,11 +289,11 @@
             color: #94a3b8;
         }
 
-        /* Modal */
+        /* Modal Overlay */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.7);
+            background: rgba(0, 0, 0, 0.75);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -253,12 +313,139 @@
             font-size: 16px;
             color: #38bdf8;
         }
+        .modal textarea {
+            width: 100%;
+            background: var(--slate-900);
+            border: 1px solid var(--slate-700);
+            border-radius: 8px;
+            padding: 10px 12px;
+            color: #fff;
+            font-size: 13.5px;
+            font-family: inherit;
+        }
         .modal-buttons {
             display: flex;
             justify-content: flex-end;
             gap: 10px;
             margin-top: 14px;
         }
+
+        /* Themed Android-Friendly Bottom Sheet Picker */
+        .sheet-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            animation: fadeIn 0.15s ease;
+        }
+        .sheet-container {
+            background: #1e293b;
+            border-top: 1px solid #475569;
+            border-radius: 20px 20px 0 0;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.5);
+            animation: slideUp 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .sheet-handle {
+            width: 38px;
+            height: 4px;
+            background: #475569;
+            border-radius: 999px;
+            margin: 10px auto 4px;
+        }
+        .sheet-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 18px;
+            border-bottom: 1px solid #334155;
+        }
+        .sheet-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #38bdf8;
+            margin: 0;
+        }
+        .sheet-close {
+            background: rgba(51, 65, 85, 0.6);
+            border: none;
+            color: #94a3b8;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .sheet-search {
+            padding: 10px 16px;
+            border-bottom: 1px solid #334155;
+        }
+        .sheet-search input {
+            width: 100%;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 9px 12px;
+            color: #fff;
+            font-size: 13.5px;
+            font-family: inherit;
+        }
+        .sheet-search input:focus {
+            outline: none;
+            border-color: #38bdf8;
+        }
+        .sheet-body {
+            overflow-y: auto;
+            padding: 8px 12px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            -webkit-overflow-scrolling: touch;
+        }
+        .sheet-item {
+            padding: 13px 14px;
+            border-radius: 10px;
+            color: #f1f5f9;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            background: transparent;
+            transition: background 0.1s ease;
+        }
+        .sheet-item:active {
+            background: #334155;
+        }
+        .sheet-item.selected {
+            background: rgba(56, 189, 248, 0.15);
+            color: #38bdf8;
+            font-weight: 600;
+        }
+        .sheet-item .check {
+            color: #38bdf8;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
         .hidden { display: none !important; }
     </style>
 </head>
@@ -268,35 +455,51 @@
         <div class="card">
             <div class="card-header">
                 <h2 class="card-title">🏭 اختيار الماكينة</h2>
-                <span id="machines-count" class="badge-live" style="background: transparent; border: none; color: #94a3b8;">0 ماكينة معتمدة</span>
+                <span id="machines-count" class="badge-live">0 ماكينة</span>
             </div>
+            
             <div class="form-row">
-                <div>
-                    <label for="select-site">الموقع (Site):</label>
-                    <select id="select-site">
-                        <option value="">-- اختر الموقع --</option>
-                        <option value="ACACIA">مبنى الأكاسيا (ACACIA)</option>
-                        <option value="PALMIER">مبنى البالميي (PALMIER)</option>
-                    </select>
+                <div class="select-group">
+                    <label>الموقع (Site):</label>
+                    <div class="custom-select-trigger" id="trigger-site">
+                        <span id="text-site">-- اختر الموقع --</span>
+                        <span class="arrow">▾</span>
+                    </div>
                 </div>
-                <div>
-                    <label for="select-section">القسم (Section / Line):</label>
-                    <select id="select-section" disabled>
-                        <option value="">-- اختر القسم أولاً --</option>
-                    </select>
+                <div class="select-group">
+                    <label>القسم (Section / Line):</label>
+                    <div class="custom-select-trigger disabled" id="trigger-section">
+                        <span id="text-section">-- اختر القسم أولاً --</span>
+                        <span class="arrow">▾</span>
+                    </div>
                 </div>
             </div>
-            <div>
-                <label for="select-machine">الماكينة المستهدفة:</label>
-                <select id="select-machine" disabled>
-                    <option value="">-- اختر الماكينة للتشخيص --</option>
-                </select>
+
+            <div class="select-group">
+                <label>الماكينة المستهدفة:</label>
+                <div class="custom-select-trigger disabled" id="trigger-machine">
+                    <span id="text-machine">-- اختر الماكينة للتشخيص --</span>
+                    <span class="arrow">▾</span>
+                </div>
             </div>
-            <div id="machine-details" class="machine-info hidden" style="margin-top: 10px;">
-                <div><b>كود الماكينة (ID)</b><span id="det-id">-</span></div>
-                <div><b>كود JDE</b><span id="det-jde">-</span></div>
-                <div><b>الموديل / المُصنع</b><span id="det-model">-</span></div>
-                <div><b>الغرفة</b><span id="det-room">-</span></div>
+
+            <div id="machine-details" class="machine-info hidden">
+                <div class="info-cell">
+                    <b>كود الماكينة (ID)</b>
+                    <span id="det-id">-</span>
+                </div>
+                <div class="info-cell">
+                    <b>كود JDE</b>
+                    <span id="det-jde">-</span>
+                </div>
+                <div class="info-cell">
+                    <b>الموديل / المُصنع</b>
+                    <span id="det-model">-</span>
+                </div>
+                <div class="info-cell">
+                    <b>الغرفة</b>
+                    <span id="det-room">-</span>
+                </div>
             </div>
         </div>
 
@@ -313,7 +516,7 @@
             </div>
 
             <div class="chat-input-bar">
-                <input type="text" id="query-input" placeholder="اكتب وصف العطل أو كود الإنذار (مثال: Alarm 240 heating)..." />
+                <input type="text" id="query-input" placeholder="اكتب كود العطل أو الإنذار (مثال: 501, heating, sensor)..." />
                 <button id="btn-send" class="btn">
                     <span>فحص العطل</span> 🔍
                 </button>
@@ -351,18 +554,44 @@
         </div>
     </div>
 
+    <!-- Themed Mobile Bottom Sheet Picker Component -->
+    <div id="picker-sheet-overlay" class="sheet-overlay hidden">
+        <div class="sheet-container">
+            <div class="sheet-handle"></div>
+            <div class="sheet-header">
+                <h3 class="sheet-title" id="sheet-title">اختر</h3>
+                <button type="button" class="sheet-close" id="sheet-close-btn">✕</button>
+            </div>
+            <div class="sheet-search hidden" id="sheet-search-box">
+                <input type="text" id="sheet-search-input" placeholder="🔍 تصفية في القائمة..." autocomplete="off" />
+            </div>
+            <div class="sheet-body" id="sheet-items-list">
+                <!-- Populated dynamically -->
+            </div>
+        </div>
+    </div>
+
     <script>
         let allMachines = [];
         let sectionsBySite = {};
         let currentSessionId = null;
         let selectedMachine = null;
+        let selectedSite = null;
+        let selectedSection = null;
         let brokerMode = '4g-relay';
 
+        const QUEUE_CHANNEL = "cairo_tech_pwa_queue_78a1bc49df20";
+
         // Elements
-        const selectSite = document.getElementById('select-site');
-        const selectSection = document.getElementById('select-section');
-        const selectMachine = document.getElementById('select-machine');
+        const triggerSite = document.getElementById('trigger-site');
+        const textSite = document.getElementById('text-site');
+        const triggerSection = document.getElementById('trigger-section');
+        const textSection = document.getElementById('text-section');
+        const triggerMachine = document.getElementById('trigger-machine');
+        const textMachine = document.getElementById('text-machine');
         const machineDetails = document.getElementById('machine-details');
+        const machinesCountEl = document.getElementById('machines-count');
+
         const chatSection = document.getElementById('chat-section');
         const messagesArea = document.getElementById('messages-area');
         const queryInput = document.getElementById('query-input');
@@ -375,9 +604,17 @@
         const closeNotes = document.getElementById('close-notes');
         const archiveBanner = document.getElementById('archive-banner');
         const archiveSummaryText = document.getElementById('archive-summary-text');
-        const machinesCountEl = document.getElementById('machines-count');
 
-        const QUEUE_CHANNEL = "cairo_tech_pwa_queue_78a1bc49df20";
+        // Sheet Picker Elements
+        const sheetOverlay = document.getElementById('picker-sheet-overlay');
+        const sheetTitle = document.getElementById('sheet-title');
+        const sheetCloseBtn = document.getElementById('sheet-close-btn');
+        const sheetSearchBox = document.getElementById('sheet-search-box');
+        const sheetSearchInput = document.getElementById('sheet-search-input');
+        const sheetItemsList = document.getElementById('sheet-items-list');
+
+        let currentPickerType = null;
+        let currentRawItems = [];
 
         // 1. Initialize
         async function init() {
@@ -425,83 +662,167 @@
             }
         }
 
-        // 2. Cascading selects
-        selectSite.addEventListener('change', () => {
-            const site = selectSite.value;
-            selectSection.innerHTML = '<option value="">-- اختر القسم --</option>';
-            selectMachine.innerHTML = '<option value="">-- اختر الماكينة --</option>';
-            selectMachine.disabled = true;
-            machineDetails.classList.add('hidden');
-            chatSection.classList.add('hidden');
+        // 2. Custom Themed Bottom Sheet Picker Logic
+        function openPicker(type) {
+            currentPickerType = type;
+            sheetSearchInput.value = '';
+            
+            if (type === 'site') {
+                sheetTitle.textContent = '🏢 اختر الموقع';
+                sheetSearchBox.classList.add('hidden');
+                currentRawItems = [
+                    { value: 'ACACIA', label: 'مبنى الأكاسيا (ACACIA)', selected: selectedSite === 'ACACIA' },
+                    { value: 'PALMIER', label: 'مبنى البالميي (PALMIER)', selected: selectedSite === 'PALMIER' }
+                ];
+            } else if (type === 'section') {
+                if (!selectedSite || !sectionsBySite[selectedSite]) return;
+                sheetTitle.textContent = '📍 اختر القسم';
+                sheetSearchBox.classList.add('hidden');
+                currentRawItems = sectionsBySite[selectedSite].map(sec => ({
+                    value: sec,
+                    label: sec,
+                    selected: selectedSection === sec
+                }));
+            } else if (type === 'machine') {
+                if (!selectedSite || !selectedSection) return;
+                sheetTitle.textContent = '⚙️ اختر الماكينة';
+                sheetSearchBox.classList.remove('hidden');
 
-            if (!site || !sectionsBySite[site]) {
-                selectSection.disabled = true;
+                const filtered = allMachines.filter(m => {
+                    const bldMatch = (m.building || '').toUpperCase() === selectedSite;
+                    const secMatch = (m.section || '').toLowerCase() === selectedSection.toLowerCase() || (m.area || '').toLowerCase() === selectedSection.toLowerCase();
+                    return bldMatch && secMatch;
+                });
+
+                currentRawItems = filtered.map(m => {
+                    const name = m.display_name || m.id;
+                    const sub = `${m.manufacturer || ''} ${m.model || ''}`.trim();
+                    return {
+                        value: m.id,
+                        label: name,
+                        subtext: sub || (m.room_no ? `غرفة ${m.room_no}` : ''),
+                        selected: selectedMachine && selectedMachine.id === m.id
+                    };
+                });
+            }
+
+            renderSheetItems();
+            sheetOverlay.classList.remove('hidden');
+            if (!sheetSearchBox.classList.contains('hidden')) {
+                setTimeout(() => sheetSearchInput.focus(), 200);
+            }
+        }
+
+        function renderSheetItems() {
+            const query = (sheetSearchInput.value || '').trim().toLowerCase();
+            const items = currentRawItems.filter(item => {
+                if (!query) return true;
+                const matchLabel = item.label.toLowerCase().includes(query);
+                const matchSub = (item.subtext || '').toLowerCase().includes(query);
+                return matchLabel || matchSub;
+            });
+
+            if (items.length === 0) {
+                sheetItemsList.innerHTML = '<div style="text-align: center; color: #94a3b8; padding: 24px 0; font-size: 13px;">لا توجد خيارات مطابقة.</div>';
                 return;
             }
 
-            sectionsBySite[site].forEach(sec => {
-                const opt = document.createElement('option');
-                opt.value = sec;
-                opt.textContent = sec;
-                selectSection.appendChild(opt);
+            sheetItemsList.innerHTML = '';
+            items.forEach(item => {
+                const row = document.createElement('div');
+                row.className = `sheet-item ${item.selected ? 'selected' : ''}`;
+                row.innerHTML = `
+                    <div>
+                        <div>${item.label}</div>
+                        ${item.subtext ? `<div style="font-size: 11px; color: #94a3b8; margin-top: 2px;">${item.subtext}</div>` : ''}
+                    </div>
+                    ${item.selected ? '<span class="check">✓</span>' : ''}
+                `;
+                row.addEventListener('click', () => {
+                    onPickerItemSelected(item.value, item.label);
+                });
+                sheetItemsList.appendChild(row);
             });
-            selectSection.disabled = false;
+        }
+
+        function closePicker() {
+            sheetOverlay.classList.add('hidden');
+        }
+
+        sheetCloseBtn.addEventListener('click', closePicker);
+        sheetOverlay.addEventListener('click', (e) => {
+            if (e.target === sheetOverlay) closePicker();
         });
+        sheetSearchInput.addEventListener('input', renderSheetItems);
 
-        selectSection.addEventListener('change', () => {
-            const site = selectSite.value;
-            const sec = selectSection.value;
-            selectMachine.innerHTML = '<option value="">-- اختر الماكينة للتشخيص --</option>';
-            machineDetails.classList.add('hidden');
-            chatSection.classList.add('hidden');
+        function onPickerItemSelected(val, label) {
+            closePicker();
 
-            if (!sec) {
-                selectMachine.disabled = true;
-                return;
-            }
+            if (currentPickerType === 'site') {
+                selectedSite = val;
+                textSite.textContent = label;
+                
+                // Reset Section & Machine
+                selectedSection = null;
+                selectedMachine = null;
+                textSection.textContent = '-- اختر القسم --';
+                triggerSection.classList.remove('disabled');
 
-            const filtered = allMachines.filter(m => {
-                const bldMatch = (m.building || '').toUpperCase() === site;
-                const secMatch = (m.section || '').toLowerCase() === sec.toLowerCase() || (m.area || '').toLowerCase() === sec.toLowerCase();
-                return bldMatch && secMatch;
-            });
+                textMachine.textContent = '-- اختر الماكينة للتشخيص --';
+                triggerMachine.classList.add('disabled');
 
-            filtered.forEach(m => {
-                const opt = document.createElement('option');
-                opt.value = m.id;
-                opt.textContent = m.display_name || m.id;
-                selectMachine.appendChild(opt);
-            });
-            selectMachine.disabled = false;
-        });
-
-        selectMachine.addEventListener('change', () => {
-            const machId = selectMachine.value;
-            if (!machId) {
                 machineDetails.classList.add('hidden');
                 chatSection.classList.add('hidden');
-                return;
-            }
 
-            selectedMachine = allMachines.find(m => m.id === machId);
-            if (selectedMachine) {
-                document.getElementById('det-id').textContent = selectedMachine.id;
-                document.getElementById('det-jde').textContent = selectedMachine.jde_code || 'N/A';
-                document.getElementById('det-model').textContent = `${selectedMachine.manufacturer || ''} ${selectedMachine.model || ''}`.trim() || 'N/A';
-                document.getElementById('det-room').textContent = selectedMachine.room_no || 'N/A';
-                machineDetails.classList.remove('hidden');
+            } else if (currentPickerType === 'section') {
+                selectedSection = val;
+                textSection.textContent = label;
 
-                // Reset chat
-                currentSessionId = null;
-                messagesArea.innerHTML = `
-                    <div class="message assistant">
-                        أدخل كود العطل أو الإنذار لماكينة <b>${selectedMachine.display_name || selectedMachine.id}</b>.
-                    </div>
-                `;
-                sessionIdDisplay.textContent = 'جلسة: جديدة (تُنشأ مع أول سؤال)';
-                chatSection.classList.remove('hidden');
-                archiveBanner.classList.add('hidden');
+                // Reset Machine
+                selectedMachine = null;
+                textMachine.textContent = '-- اختر الماكينة للتشخيص --';
+                triggerMachine.classList.remove('disabled');
+
+                machineDetails.classList.add('hidden');
+                chatSection.classList.add('hidden');
+
+            } else if (currentPickerType === 'machine') {
+                selectedMachine = allMachines.find(m => m.id === val);
+                if (selectedMachine) {
+                    textMachine.textContent = selectedMachine.display_name || selectedMachine.id;
+
+                    document.getElementById('det-id').textContent = selectedMachine.id;
+                    document.getElementById('det-jde').textContent = selectedMachine.jde_code || 'N/A';
+                    document.getElementById('det-model').textContent = `${selectedMachine.manufacturer || ''} ${selectedMachine.model || ''}`.trim() || 'N/A';
+                    document.getElementById('det-room').textContent = selectedMachine.room_no || 'N/A';
+                    machineDetails.classList.remove('hidden');
+
+                    // Reset chat
+                    currentSessionId = null;
+                    messagesArea.innerHTML = `
+                        <div class="message assistant">
+                            أدخل كود العطل أو الإنذار لماكينة <b>${selectedMachine.display_name || selectedMachine.id}</b>.
+                        </div>
+                    `;
+                    sessionIdDisplay.textContent = 'جلسة: جديدة (تُنشأ مع أول سؤال)';
+                    chatSection.classList.remove('hidden');
+                    archiveBanner.classList.add('hidden');
+
+                    // Smooth scroll to chat
+                    setTimeout(() => {
+                        chatSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    }, 200);
+                }
             }
+        }
+
+        // Trigger clicks
+        triggerSite.addEventListener('click', () => openPicker('site'));
+        triggerSection.addEventListener('click', () => {
+            if (!triggerSection.classList.contains('disabled')) openPicker('section');
+        });
+        triggerMachine.addEventListener('click', () => {
+            if (!triggerMachine.classList.contains('disabled')) openPicker('machine');
         });
 
         // 3. Send query
@@ -804,7 +1125,7 @@
             }
         });
 
-        // 5. Register Service Worker (v4)
+        // 5. Register Service Worker (v5)
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js').then((reg) => {
