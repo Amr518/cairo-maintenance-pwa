@@ -161,18 +161,18 @@
             border-radius: 12px;
             padding: 12px;
             min-height: 250px;
-            max-height: 450px;
+            max-height: 65vh;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
             gap: 12px;
         }
         .message {
-            max-width: 88%;
-            padding: 10px 14px;
+            max-width: 95%;
+            padding: 12px 14px;
             border-radius: 14px;
             font-size: 13.5px;
-            line-height: 1.5;
+            line-height: 1.6;
             word-wrap: break-word;
         }
         .message.user {
@@ -861,11 +861,52 @@
             if (e.key === 'Enter') sendQuery();
         });
 
+        function escapeHtml(str) {
+            return str
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+        }
+
         function appendMessage(role, text, parts) {
             const msgDiv = document.createElement('div');
             msgDiv.className = `message ${role}`;
-            let formatted = text.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+            
+            // Format complete markdown text safely preserving symbols and full character length
+            const safe = escapeHtml(text || '');
+            let formatted = safe
+                .replace(/\n/g, '<br>')
+                .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+                .replace(/\*(.*?)\*/g, '<i>$1</i>');
             msgDiv.innerHTML = formatted;
+
+            // Add full text copy button for catalog diagnosis
+            if (role === 'assistant' && text && text.length > 80) {
+                const actionRow = document.createElement('div');
+                actionRow.style.marginTop = '10px';
+                actionRow.style.display = 'flex';
+                actionRow.style.gap = '8px';
+                actionRow.style.alignItems = 'center';
+
+                const copyBtn = document.createElement('button');
+                copyBtn.className = 'btn';
+                copyBtn.style.padding = '4px 10px';
+                copyBtn.style.fontSize = '11px';
+                copyBtn.style.background = 'var(--slate-700)';
+                copyBtn.style.color = '#38bdf8';
+                copyBtn.style.border = '1px solid var(--slate-600)';
+                copyBtn.innerHTML = '📋 نسخ نص الكتالوج كاملاً';
+                copyBtn.onclick = () => {
+                    navigator.clipboard.writeText(text).then(() => {
+                        copyBtn.textContent = '✅ تم النسخ بنجاح!';
+                        setTimeout(() => { copyBtn.innerHTML = '📋 نسخ نص الكتالوج كاملاً'; }, 2500);
+                    }).catch(() => {
+                        alert('تعذر الوصول للحافظة تلقائياً، يمكنك تحديد النص ونسخه.');
+                    });
+                };
+                actionRow.appendChild(copyBtn);
+                msgDiv.appendChild(actionRow);
+            }
 
             if (parts && parts.length > 0) {
                 const partsDiv = document.createElement('div');
