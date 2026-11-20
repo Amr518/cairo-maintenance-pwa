@@ -344,16 +344,14 @@
             </div>
             <div id="messages-area" class="messages-area">
                 <div class="message assistant">
-                    مرحباً بك! اخترت ماكينة <b id="chat-mach-name">...</b>.<br>
-                    اكتب وصف العطل أو كود الإنذار للبحث المباشر في الكتالوج الرسمي.
-                    <div class="msg-meta">الكتالوج متصل ومفهرس</div>
+                    أدخل كود العطل أو الإنذار لبدء الفحص الفني.
                 </div>
             </div>
 
             <div class="chat-input-bar">
                 <input type="text" id="query-input" placeholder="اكتب وصف العطل أو كود الإنذار (مثال: Alarm 240 heating)..." />
                 <button id="btn-send" class="btn">
-                    <span>اسأل الكتالوج</span> 🔍
+                    <span>فحص العطل</span> 🔍
                 </button>
             </div>
 
@@ -619,9 +617,7 @@
                 document.getElementById('chat-mach-name').textContent = selectedMachine.display_name || selectedMachine.id;
                 messagesArea.innerHTML = `
                     <div class="message assistant">
-                        مرحباً بك! اخترت ماكينة <b>${selectedMachine.display_name || selectedMachine.id}</b>.<br>
-                        اكتب وصف العطل أو كود الإنذار للبحث المباشر في الكتالوج الرسمي.
-                        <div class="msg-meta">الكتالوج مفهرس | النمط: ${brokerMode === 'cloud' ? 'وسيط سحابي (Supabase)' : 'مباشر (Local)'}</div>
+                        أدخل كود العطل أو الإنذار لماكينة <b>${selectedMachine.display_name || selectedMachine.id}</b>.
                     </div>
                 `;
                 sessionIdDisplay.textContent = 'جلسة: جديدة (تُنشأ مع أول سؤال)';
@@ -630,7 +626,7 @@
             }
         });
 
-        // 4. Send Question to Catalog (Dual Mode)
+        // 4. Send Question to Diagnostic Engine
         async function sendQuery() {
             const q = queryInput.value.trim();
             if (!q || !selectedMachine) return;
@@ -638,13 +634,13 @@
             appendMessage('user', q);
             queryInput.value = '';
             btnSend.disabled = true;
-            btnSend.textContent = 'جاري البحث في الكتالوج... ⏳';
+            btnSend.textContent = 'جاري الفحص... ⏳';
 
             if (brokerMode === '4g-relay') {
                 // Zero-Tunnel 4G Outbound Cloud Queue (SSE Streaming)
                 const jobId = 'job_' + Date.now().toString(36) + '_' + Math.random().toString(36).substr(2, 5);
                 currentSessionId = jobId;
-                sessionIdDisplay.textContent = `مهمة 4G سحابية: ${jobId}`;
+                sessionIdDisplay.textContent = `مهمة 4G: ${jobId}`;
 
                 // Add in-chat loading message
                 const loadingDiv = document.createElement('div');
@@ -656,8 +652,8 @@
                     <div style="display: flex; align-items: center; gap: 8px;">
                         <span>⏳</span>
                         <div>
-                            <b>جاري الاتصال بكتالوج الماكينة الرسمي...</b><br>
-                            <span id="load-status-${jobId}" style="font-size: 11.5px; color: #94a3b8;">جاري استخراج بارامترات وأكواد العطل عبر NotebookLM</span>
+                            <b>جاري استخراج البيانات الفنية...</b><br>
+                            <span id="load-status-${jobId}" style="font-size: 11.5px; color: #94a3b8;">مطابقة كود العطل ومراجعة خطوات الإصلاح المعتمدة</span>
                         </div>
                     </div>
                 `;
@@ -667,18 +663,8 @@
                 const statusUpdates = [
                     setTimeout(() => {
                         const s = document.getElementById(`load-status-${jobId}`);
-                        if (s) s.textContent = '📖 جاري قراءة الكتالوج التشخيصي ومطابقة أكواد الإنذار...';
-                        btnSend.textContent = '📖 فحص الكتالوج في NotebookLM...';
-                    }, 5000),
-                    setTimeout(() => {
-                        const s = document.getElementById(`load-status-${jobId}`);
-                        if (s) s.textContent = '⚡ جاري تلخيص الحل الهندسي وفحص مخزون قطع الغيار...';
-                        btnSend.textContent = '⚡ صياغة الحل وقطع الغيار...';
-                    }, 20000),
-                    setTimeout(() => {
-                        const s = document.getElementById(`load-status-${jobId}`);
-                        if (s) s.textContent = '🔄 جاري استقبال الرد السحابي النهائي...';
-                    }, 35000)
+                        if (s) s.textContent = 'مطابقة كود العطل ومراجعة قطع الغيار...';
+                    }, 15000)
                 ];
 
                 const resChannel = `${QUEUE_CHANNEL}_res_${jobId}`;
@@ -693,8 +679,8 @@
                     const loadEl = document.getElementById(loadingId);
                     if (loadEl) loadEl.remove();
                     btnSend.disabled = false;
-                    btnSend.innerHTML = '<span>اسأل الكتالوج</span> 🔍';
-                    appendMessage('assistant', solution || 'لا يوجد رد في الكتالوج.', parts);
+                    btnSend.innerHTML = '<span>فحص العطل</span> 🔍';
+                    appendMessage('assistant', solution || 'لم يتم العثور على تشخيص مطابق لكود العطل المدخل.', parts);
                 }
 
                 async function extractPayload(item) {
@@ -768,7 +754,7 @@
                     if (loadEl) loadEl.remove();
                     appendMessage('assistant', `⚠️ حدث خطأ أثناء إرسال الاستفسار: ${e.message}`);
                     btnSend.disabled = false;
-                    btnSend.innerHTML = '<span>اسأل الكتالوج</span> 🔍';
+                    btnSend.innerHTML = '<span>فحص العطل</span> 🔍';
                 }
             } else if (brokerMode === 'supabase' && supabaseClient) {
                 // Cloud Broker Mode (Supabase)
@@ -817,14 +803,14 @@
                         if (jobPollTimer) { clearInterval(jobPollTimer); jobPollTimer = null; }
                         supabaseClient.removeChannel(channel);
                         btnSend.disabled = false;
-                        btnSend.innerHTML = '<span>اسأل الكتالوج</span> 🔍';
-                        appendMessage('assistant', solution || 'لا يوجد رد في الكتالوج.', parts);
+                        btnSend.innerHTML = '<span>فحص العطل</span> 🔍';
+                        appendMessage('assistant', solution || 'لم يتم العثور على تشخيص مطابق لكود العطل المدخل.', parts);
                     }
 
                 } catch (e) {
                     appendMessage('assistant', `⚠️ حدث خطأ في وسيط السحابة: ${e.message}`);
                     btnSend.disabled = false;
-                    btnSend.innerHTML = '<span>اسأل الكتالوج</span> 🔍';
+                    btnSend.innerHTML = '<span>فحص العطل</span> 🔍';
                 }
             } else {
                 // Local Direct API Mode
@@ -846,12 +832,12 @@
                         currentSessionId = data.session_id;
                         sessionIdDisplay.textContent = `جلسة: ${currentSessionId}`;
                     }
-                    appendMessage('assistant', data.solution || 'لا يوجد رد متاح من الكتالوج.', data.suggested_parts);
+                    appendMessage('assistant', data.solution || 'لم يتم العثور على تشخيص مطابق لكود العطل المدخل.', data.suggested_parts);
                 } catch (e) {
-                    appendMessage('assistant', `⚠️ حدث خطأ في الاتصال بالكتالوج: ${e.message}`);
+                    appendMessage('assistant', `⚠️ حدث خطأ أثناء فحص العطل: ${e.message}`);
                 } finally {
                     btnSend.disabled = false;
-                    btnSend.innerHTML = '<span>اسأل الكتالوج</span> 🔍';
+                    btnSend.innerHTML = '<span>فحص العطل</span> 🔍';
                 }
             }
         }
@@ -880,7 +866,7 @@
                 .replace(/\*(.*?)\*/g, '<i>$1</i>');
             msgDiv.innerHTML = formatted;
 
-            // Add full text copy button for catalog diagnosis
+            // Add full text copy button for diagnosis
             if (role === 'assistant' && text && text.length > 80) {
                 const actionRow = document.createElement('div');
                 actionRow.style.marginTop = '10px';
@@ -895,11 +881,11 @@
                 copyBtn.style.background = 'var(--slate-700)';
                 copyBtn.style.color = '#38bdf8';
                 copyBtn.style.border = '1px solid var(--slate-600)';
-                copyBtn.innerHTML = '📋 نسخ نص الكتالوج كاملاً';
+                copyBtn.innerHTML = '📋 نسخ البيانات الفنية';
                 copyBtn.onclick = () => {
                     navigator.clipboard.writeText(text).then(() => {
                         copyBtn.textContent = '✅ تم النسخ بنجاح!';
-                        setTimeout(() => { copyBtn.innerHTML = '📋 نسخ نص الكتالوج كاملاً'; }, 2500);
+                        setTimeout(() => { copyBtn.innerHTML = '📋 نسخ البيانات الفنية'; }, 2500);
                     }).catch(() => {
                         alert('تعذر الوصول للحافظة تلقائياً، يمكنك تحديد النص ونسخه.');
                     });
@@ -911,7 +897,7 @@
             if (parts && parts.length > 0) {
                 const partsDiv = document.createElement('div');
                 partsDiv.className = 'parts-grid';
-                partsDiv.innerHTML = '<div style="font-size: 11px; font-weight: bold; color: #38bdf8; margin-top: 6px;">⚙️ قطع الغيار المقترحة من الكتالوج:</div>';
+                partsDiv.innerHTML = '<div style="font-size: 11px; font-weight: bold; color: #38bdf8; margin-top: 6px;">⚙️ قطع الغيار المرتبطة بالعطل:</div>';
 
                 parts.forEach(p => {
                     const chip = document.createElement('div');
