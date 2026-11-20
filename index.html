@@ -12,6 +12,7 @@
     <meta name="apple-mobile-web-app-title" content="صيانة Servier">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#242269">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://ntfy.sh http://127.0.0.1:8098 http://localhost:8098;">
     <style>
         :root {
             --navy: #242269;
@@ -680,6 +681,28 @@
         let brokerMode = '4g-relay';
 
         const QUEUE_CHANNEL = "cairo_tech_pwa_queue_78a1bc49df20";
+        const RELAY_SECRET = "servier_cairo_sec_relay_2026";
+
+        async function computeClientSignature(jobId, machineId, text, timestamp, nonce, secretKey) {
+            try {
+                const enc = new TextEncoder();
+                const key = await crypto.subtle.importKey(
+                    "raw",
+                    enc.encode(secretKey),
+                    { name: "HMAC", hash: { name: "SHA-256" } },
+                    false,
+                    ["sign"]
+                );
+                const canonical = enc.encode(`${jobId}:${machineId}:${timestamp}:${nonce}:${text}`);
+                const signature = await crypto.subtle.sign("HMAC", key, canonical);
+                return Array.from(new Uint8Array(signature))
+                    .map(b => b.toString(16).padStart(2, '0'))
+                    .join('');
+            } catch (e) {
+                console.warn("HMAC client sign warning:", e);
+                return "";
+            }
+        }
 
         // Elements
         const triggerSite = document.getElementById('trigger-site');
@@ -1007,6 +1030,10 @@
                         } catch(err) {}
                     };
 
+                    const ts = Math.floor(Date.now() / 1000);
+                    const nonce = 'n_' + Math.random().toString(36).substring(2, 10) + '_' + ts;
+                    const sig = await computeClientSignature(jobId, selectedMachine.id, q, ts, nonce, RELAY_SECRET);
+
                     await fetch(`https://ntfy.sh/${QUEUE_CHANNEL}`, {
                         method: 'POST',
                         body: JSON.stringify({
@@ -1014,7 +1041,10 @@
                             machine_id: selectedMachine.id,
                             query: q,
                             technician_name: 'Technician (4G)',
-                            status: 'pending'
+                            status: 'pending',
+                            timestamp: ts,
+                            nonce: nonce,
+                            sig: sig
                         })
                     });
 
@@ -1211,14 +1241,23 @@
 
             if (brokerMode === '4g-relay') {
                 try {
+                    const ts = Math.floor(Date.now() / 1000);
+                    const nonce = 'n_cls_' + Math.random().toString(36).substring(2, 10) + '_' + ts;
+                    const machId = selectedMachine ? selectedMachine.id : '';
+                    const notesText = notes || 'تم حل العطل وإغلاق الجلسة بواسطة الفني عبر 4G.';
+                    const sig = await computeClientSignature(currentSessionId, machId, notesText, ts, nonce, RELAY_SECRET);
+
                     await fetch(`https://ntfy.sh/${QUEUE_CHANNEL}_close`, {
                         method: 'POST',
                         body: JSON.stringify({
                             job_id: currentSessionId,
-                            machine_id: selectedMachine ? selectedMachine.id : 'UNKNOWN',
-                            technician_notes: notes || 'تم حل العطل وإغلاق الجلسة بواسطة الفني عبر 4G.',
+                            machine_id: machId,
+                            technician_notes: notesText,
                             status: 'closed',
-                            solution: 'Incident resolved.'
+                            solution: 'Incident resolved.',
+                            timestamp: ts,
+                            nonce: nonce,
+                            sig: sig
                         })
                     });
                     closeModal.classList.add('hidden');
