@@ -257,28 +257,71 @@
         }
 
         .parts-grid {
-            margin-top: 8px;
-            display: grid;
-            gap: 6px;
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
         }
-        .part-chip {
+        .part-card {
             background: #fff;
             border: 1px solid var(--line);
-            border-radius: 8px;
-            padding: 6px 10px;
-            font-size: 12px;
+            border-radius: 10px;
+            padding: 9px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+            text-align: right;
+        }
+        .part-header {
             display: flex;
             justify-content: space-between;
+            align-items: flex-start;
+            gap: 8px;
+        }
+        .part-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--navy);
+            line-height: 1.35;
+            flex: 1;
+        }
+        .part-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px 12px;
+            font-size: 11.5px;
+            color: var(--ink);
+            padding-top: 4px;
+            border-top: 1px dashed rgba(223, 226, 236, 0.8);
+        }
+        .part-meta-item {
+            display: inline-flex;
             align-items: center;
+            gap: 4px;
+        }
+        .part-meta-item b {
+            color: var(--navy);
+            font-weight: 700;
+        }
+        .part-role {
+            font-size: 11px;
+            color: var(--muted);
+            line-height: 1.35;
+            background: var(--alt);
+            padding: 4px 8px;
+            border-radius: 6px;
         }
         .stock-tag {
             font-size: 10.5px;
-            padding: 2px 7px;
+            padding: 2.5px 8px;
             border-radius: 6px;
             font-weight: 700;
+            white-space: nowrap;
         }
-        .stock-tag.in { background: #EBF1DE; color: #4F6228; }
-        .stock-tag.out { background: #FDE9D9; color: var(--red); }
+        .stock-tag.in { background: #EBF1DE; color: #4F6228; border: 1px solid #C4D9A0; }
+        .stock-tag.out { background: #FDE9D9; color: var(--red); border: 1px solid #F8CBB0; }
+        .stock-tag.none { background: var(--alt); color: var(--muted); border: 1px solid var(--line); }
 
         /* Input Controls */
         .chat-input-bar {
@@ -1051,7 +1094,8 @@
             let formatted = safe
                 .replace(/\n/g, '<br>')
                 .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
-                .replace(/\*(.*?)\*/g, '<i>$1</i>');
+                .replace(/\*(.*?)\*/g, '<i>$1</i>')
+                .replace(/`([^`]+)`/g, '<code style="background:var(--alt);padding:1px 5px;border-radius:4px;font-family:monospace;font-size:12px;color:var(--navy);border:1px solid var(--line);">$1</code>');
             msgDiv.innerHTML = formatted;
 
             if (role === 'assistant' && text && text.length > 80) {
@@ -1081,19 +1125,56 @@
             if (parts && parts.length > 0) {
                 const partsDiv = document.createElement('div');
                 partsDiv.className = 'parts-grid';
-                partsDiv.innerHTML = '<div style="font-size: 11.5px; font-weight: bold; color: var(--navy); margin-top: 6px;">⚙️ قطع الغيار المرتبطة بالعطل:</div>';
+                partsDiv.innerHTML = '<div style="font-size: 12px; font-weight: bold; color: var(--navy); margin-top: 8px; display: flex; align-items: center; gap: 6px;"><span>⚙️</span><span>قطع الغيار والمكونات المرتبطة بالعطل (' + parts.length + '):</span></div>';
 
                 parts.forEach(p => {
-                    const chip = document.createElement('div');
-                    chip.className = 'part-chip';
-                    const qty = p.qty_on_hand !== undefined ? p.qty_on_hand : 0;
-                    const stockClass = qty > 0 ? 'in' : 'out';
-                    const stockLabel = qty > 0 ? `متوفر (${qty})` : 'غير متوفر';
-                    chip.innerHTML = `
-                        <span>${p.name_en || p.name || 'Part'} <small style="color:var(--muted)">(${p.code_hint || p.code || 'N/A'})</small></span>
-                        <span class="stock-tag ${stockClass}">${stockLabel}</span>
+                    const card = document.createElement('div');
+                    card.className = 'part-card';
+
+                    const partName = p.part_name || p.name || p.name_en || 'صنف غير مسمى';
+                    const partCode = p.part_code || p.code || p.code_hint || (p.item_number || 'بدون كود');
+                    const rawQty = (p.qty_on_hand !== undefined && p.qty_on_hand !== null) ? Number(p.qty_on_hand) : (p.qty !== undefined ? Number(p.qty) : 0);
+                    const qty = isNaN(rawQty) ? 0 : rawQty;
+                    const location = (p.location || p.bin || '').trim();
+                    const warehouse = (p.warehouse || p.business_unit || '').trim();
+                    const role = (p.role_ar || p.role || '').trim();
+                    const stockStatus = p.stock_status || (qty > 0 ? 'IN_STOCK' : (location && location !== 'غير مدرج' ? 'ZERO_STOCK' : 'NOT_IN_DB'));
+
+                    let stockClass = 'none';
+                    let stockLabel = 'غير مدرج بالمخزن';
+                    if (qty > 0) {
+                        stockClass = 'in';
+                        stockLabel = `متوفر (${qty})`;
+                    } else if (stockStatus === 'ZERO_STOCK' || (location && location !== 'غير مدرج')) {
+                        stockClass = 'out';
+                        stockLabel = 'رصيد 0 بالمخزن';
+                    } else {
+                        stockClass = 'none';
+                        stockLabel = 'غير مدرج بالجرد';
+                    }
+
+                    let locHtml = '';
+                    if (location && location !== 'غير مدرج') {
+                        const whText = warehouse ? ` <span style="color:var(--muted)">[${escapeHtml(warehouse)}]</span>` : '';
+                        locHtml = `<span class="part-meta-item">📍 البن / الرف: <b style="color:var(--coral); font-family:monospace;">${escapeHtml(location)}</b>${whText}</span>`;
+                    } else {
+                        locHtml = `<span class="part-meta-item" style="color:var(--muted)">📍 المخزن: غير مسجل في الجرد</span>`;
+                    }
+
+                    const roleHtml = role ? `<div class="part-role">💡 <b>الدور الفني:</b> ${escapeHtml(role)}</div>` : '';
+
+                    card.innerHTML = `
+                        <div class="part-header">
+                            <div class="part-title">${escapeHtml(partName)}</div>
+                            <span class="stock-tag ${stockClass}">${stockLabel}</span>
+                        </div>
+                        <div class="part-meta">
+                            <span class="part-meta-item">🔢 رقم القطعة (Part No): <b style="font-family:monospace;letter-spacing:0.5px;">${escapeHtml(partCode)}</b></span>
+                            ${locHtml}
+                        </div>
+                        ${roleHtml}
                     `;
-                    partsDiv.appendChild(chip);
+                    partsDiv.appendChild(card);
                 });
                 msgDiv.appendChild(partsDiv);
             }
@@ -1177,7 +1258,7 @@
             }
         });
 
-        // 5. Register Service Worker (v5)
+        // 5. Register Service Worker (v7)
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js').then((reg) => {
