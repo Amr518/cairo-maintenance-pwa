@@ -641,12 +641,82 @@
             btnSend.textContent = 'جاري البحث في الكتالوج... ⏳';
 
             if (brokerMode === '4g-relay') {
-                // Zero-Tunnel 4G Outbound Cloud Queue
+                // Zero-Tunnel 4G Outbound Cloud Queue (SSE Streaming)
                 const jobId = 'job_' + Date.now().toString(36) + '_' + Math.random().toString(36).substr(2, 5);
                 currentSessionId = jobId;
                 sessionIdDisplay.textContent = `مهمة 4G سحابية: ${jobId}`;
 
+                // Add in-chat loading message
+                const loadingDiv = document.createElement('div');
+                const loadingId = 'loading-' + jobId;
+                loadingDiv.id = loadingId;
+                loadingDiv.className = 'message assistant';
+                loadingDiv.style.borderStyle = 'dashed';
+                loadingDiv.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span>⏳</span>
+                        <div>
+                            <b>جاري الاتصال بكتالوج الماكينة الرسمي...</b><br>
+                            <span id="load-status-${jobId}" style="font-size: 11.5px; color: #94a3b8;">جاري استخراج بارامترات وأكواد العطل عبر NotebookLM</span>
+                        </div>
+                    </div>
+                `;
+                messagesArea.appendChild(loadingDiv);
+                messagesArea.scrollTop = messagesArea.scrollHeight;
+
+                const statusUpdates = [
+                    setTimeout(() => {
+                        const s = document.getElementById(`load-status-${jobId}`);
+                        if (s) s.textContent = '📖 جاري قراءة الكتالوج التشخيصي ومطابقة أكواد الإنذار...';
+                        btnSend.textContent = '📖 فحص الكتالوج في NotebookLM...';
+                    }, 5000),
+                    setTimeout(() => {
+                        const s = document.getElementById(`load-status-${jobId}`);
+                        if (s) s.textContent = '⚡ جاري تلخيص الحل الهندسي وفحص مخزون قطع الغيار...';
+                        btnSend.textContent = '⚡ صياغة الحل وقطع الغيار...';
+                    }, 20000),
+                    setTimeout(() => {
+                        const s = document.getElementById(`load-status-${jobId}`);
+                        if (s) s.textContent = '🔄 جاري استقبال الرد السحابي النهائي...';
+                    }, 35000)
+                ];
+
+                const resChannel = `${QUEUE_CHANNEL}_res_${jobId}`;
+                let completed = false;
+
+                function handleDone(solution, parts) {
+                    if (completed) return;
+                    completed = true;
+                    statusUpdates.forEach(clearTimeout);
+                    if (window._currentES) { window._currentES.close(); window._currentES = null; }
+                    if (window._fallbackTimer) { clearTimeout(window._fallbackTimer); window._fallbackTimer = null; }
+                    const loadEl = document.getElementById(loadingId);
+                    if (loadEl) loadEl.remove();
+                    btnSend.disabled = false;
+                    btnSend.innerHTML = '<span>اسأل الكتالوج</span> 🔍';
+                    appendMessage('assistant', solution || 'لا يوجد رد في الكتالوج.', parts);
+                }
+
                 try {
+                    // 1. Establish SSE stream listener FIRST so zero messages are missed
+                    const es = new EventSource(`https://ntfy.sh/${resChannel}/sse`);
+                    window._currentES = es;
+                    es.onmessage = (e) => {
+                        try {
+                            const parsed = JSON.parse(e.data);
+                            if (parsed.message) {
+                                const inner = JSON.parse(parsed.message);
+                                if (inner.status === 'completed') {
+                                    handleDone(inner.solution, inner.suggested_parts);
+                                }
+                            }
+                        } catch(err) {}
+                    };
+                    es.onerror = (e) => {
+                        console.warn('SSE connection notice:', e);
+                    };
+
+                    // 2. Publish inquiry job to cloud queue
                     await fetch(`https://ntfy.sh/${QUEUE_CHANNEL}`, {
                         method: 'POST',
                         body: JSON.stringify({
@@ -658,55 +728,33 @@
                         })
                     });
 
-                    const resChannel = `${QUEUE_CHANNEL}_res_${jobId}`;
-                    let completed = false;
-
-                    function handleDone(solution, parts) {
+                    // 3. Gentle single fallback poll after 45s (immunity to 429 rate limit)
+                    window._fallbackTimer = setTimeout(async () => {
                         if (completed) return;
-                        completed = true;
-                        if (jobPollTimer) { clearInterval(jobPollTimer); jobPollTimer = null; }
-                        if (window._currentES) { window._currentES.close(); window._currentES = null; }
-                        btnSend.disabled = false;
-                        btnSend.innerHTML = '<span>اسأل الكتالوج</span> 🔍';
-                        appendMessage('assistant', solution || 'لا يوجد رد في الكتالوج.', parts);
-                    }
-
-                    try {
-                        const es = new EventSource(`https://ntfy.sh/${resChannel}/sse`);
-                        window._currentES = es;
-                        es.onmessage = (e) => {
-                            try {
-                                const parsed = JSON.parse(e.data);
-                                if (parsed.message) {
-                                    const inner = JSON.parse(parsed.message);
-                                    if (inner.status === 'completed') {
-                                        handleDone(inner.solution, inner.suggested_parts);
-                                    }
-                                }
-                            } catch(err) {}
-                        };
-                    } catch(e) {}
-
-                    jobPollTimer = setInterval(async () => {
                         try {
                             const res = await fetch(`https://ntfy.sh/${resChannel}/json?poll=1&since=all`);
-                            const text = await res.text();
-                            const lines = text.trim().split('\n').filter(Boolean);
-                            for (const line of lines) {
-                                const item = JSON.parse(line);
-                                if (item.message) {
-                                    const inner = JSON.parse(item.message);
-                                    if (inner.status === 'completed') {
-                                        handleDone(inner.solution, inner.suggested_parts);
-                                        break;
+                            if (res.ok) {
+                                const text = await res.text();
+                                const lines = text.trim().split('\n').filter(Boolean);
+                                for (const line of lines) {
+                                    const item = JSON.parse(line);
+                                    if (item.message) {
+                                        const inner = JSON.parse(item.message);
+                                        if (inner.status === 'completed') {
+                                            handleDone(inner.solution, inner.suggested_parts);
+                                            break;
+                                        }
                                     }
                                 }
                             }
-                        } catch(err) {}
-                    }, 1500);
+                        } catch(e) {}
+                    }, 45000);
 
                 } catch (e) {
-                    appendMessage('assistant', `⚠️ حدث خطأ في وسيط السحابة: ${e.message}`);
+                    statusUpdates.forEach(clearTimeout);
+                    const loadEl = document.getElementById(loadingId);
+                    if (loadEl) loadEl.remove();
+                    appendMessage('assistant', `⚠️ حدث خطأ أثناء إرسال الاستفسار: ${e.message}`);
                     btnSend.disabled = false;
                     btnSend.innerHTML = '<span>اسأل الكتالوج</span> 🔍';
                 }
