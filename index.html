@@ -628,11 +628,12 @@
             </div>
         </div>
 
-        <!-- 3. Closed Session Summary Confirmation Banner -->
-        <div id="archive-banner" class="card hidden" style="border-color: var(--green); background: #F5FAEE; border-inline-start: 5px solid var(--green);">
-            <h3 style="color: #4F6228; margin: 0 0 6px; font-size: 14px;">✅ تم إغلاق الجلسة وتطهير الذاكرة</h3>
-            <p id="archive-summary-text" style="font-size: 13px; color: var(--ink); margin: 0; line-height: 1.5;"></p>
-            <p style="font-size: 11.5px; color: var(--muted); margin: 6px 0 0;">تم حفظ الملخص الهندسي فقط في سجل أرشفة الماكينة ومسح رسائل الشات المؤقتة من الذاكرة لضمان الخصوصية وسرعة الأداء.</p>
+        <!-- 3. Closed Session Banner -->
+        <div id="archive-banner" class="card hidden" style="border-color: var(--green); background: #F5FAEE; border-inline-start: 5px solid var(--green); padding: 12px 14px; text-align: center;">
+            <div style="color: #4F6228; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                <span>✅</span>
+                <span>تم اغلاق الشات</span>
+            </div>
         </div>
     </main>
 
@@ -701,7 +702,6 @@
         const btnConfirmClose = document.getElementById('btn-confirm-close');
         const closeNotes = document.getElementById('close-notes');
         const archiveBanner = document.getElementById('archive-banner');
-        const archiveSummaryText = document.getElementById('archive-summary-text');
 
         // Sheet Picker Elements
         const sheetOverlay = document.getElementById('picker-sheet-overlay');
@@ -1223,7 +1223,6 @@
                     });
                     closeModal.classList.add('hidden');
                     chatSection.classList.add('hidden');
-                    archiveSummaryText.textContent = `تم تسجيل إغلاق المهمة السحابية بنجاح (${currentSessionId}). قام عامل السيرفر بأرشفتها وتطهير الجلسة.`;
                     archiveBanner.classList.remove('hidden');
                     currentSessionId = null;
                 } catch(e) {
@@ -1245,8 +1244,6 @@
                     const data = await res.json();
                     closeModal.classList.add('hidden');
                     chatSection.classList.add('hidden');
-
-                    archiveSummaryText.textContent = data.summary || 'تم تسجيل حل العطل بنجاح.';
                     archiveBanner.classList.remove('hidden');
                     currentSessionId = null;
                 } catch (e) {
@@ -1258,7 +1255,7 @@
             }
         });
 
-        // 5. Register Service Worker (v7)
+        // 5. Register Service Worker (v8)
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js').then((reg) => {
