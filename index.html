@@ -367,13 +367,9 @@
 
         .session-actions {
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-end;
             align-items: center;
             padding-top: 6px;
-        }
-        .session-badge {
-            font-size: 11.5px;
-            color: var(--muted);
         }
 
         /* Modal Overlay */
@@ -622,8 +618,7 @@
             </div>
 
             <div class="session-actions">
-                <span id="session-id-display" class="session-badge">جلسة: غير محددة</span>
-                <button id="btn-open-close-modal" class="btn green" style="padding: 6px 12px; font-size: 12px;">
+                <button id="btn-open-close-modal" class="btn green" style="padding: 7px 14px; font-size: 13px;">
                     ✅ تم حل العطل وإغلاق الشات
                 </button>
             </div>
@@ -718,7 +713,6 @@
         const messagesArea = document.getElementById('messages-area');
         const queryInput = document.getElementById('query-input');
         const btnSend = document.getElementById('btn-send');
-        const sessionIdDisplay = document.getElementById('session-id-display');
         const btnOpenCloseModal = document.getElementById('btn-open-close-modal');
         const closeModal = document.getElementById('close-modal');
         const btnCancelModal = document.getElementById('btn-cancel-modal');
@@ -925,7 +919,6 @@
                             أدخل كود العطل أو الإنذار لماكينة <b>${selectedMachine.display_name || selectedMachine.id}</b>.
                         </div>
                     `;
-                    sessionIdDisplay.textContent = 'جلسة: جديدة (تُنشأ مع أول سؤال)';
                     chatSection.classList.remove('hidden');
                     archiveBanner.classList.add('hidden');
 
@@ -959,7 +952,6 @@
             if (brokerMode === '4g-relay') {
                 const jobId = 'job_' + Date.now().toString(36) + '_' + Math.random().toString(36).substr(2, 5);
                 currentSessionId = jobId;
-                sessionIdDisplay.textContent = `مهمة 4G: ${jobId}`;
 
                 const loadingDiv = document.createElement('div');
                 const loadingId = 'loading-' + jobId;
@@ -1092,7 +1084,6 @@
                     const data = await res.json();
                     if (data.session_id) {
                         currentSessionId = data.session_id;
-                        sessionIdDisplay.textContent = `جلسة: ${currentSessionId}`;
                     }
                     appendMessage('assistant', data.solution || 'لم يتم العثور على تشخيص مطابق لكود العطل المدخل.', data.suggested_parts);
                 } catch (e) {
