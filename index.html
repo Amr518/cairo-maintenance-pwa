@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>منظومة الصيانة الذكية | Maintenance Core PWA</title>
+    <link rel="manifest" href="manifest.webmanifest">
+    <meta name="theme-color" content="#1e293b">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --emerald: #10b981;
+            --amber: #f59e0b;
+            --red: #ef4444;
+            --slate-900: #0f172a;
+            --slate-800: #1e293b;
+            --slate-700: #334155;
+            --slate-600: #475569;
+            --slate-200: #e2e8f0;
+            --slate-100: #f1f5f9;
+        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            background-color: var(--slate-900);
+            color: var(--slate-100);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Tahoma, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        header {
+            background: var(--slate-800);
+            border-bottom: 1px solid var(--slate-700);
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 20;
+        }
+        .header-title h1 {
+            font-size: 16px;
+            margin: 0;
+            color: #38bdf8;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .header-title p {
+            font-size: 11px;
+            color: #94a3b8;
+            margin: 2px 0 0;
+        }
+        .badge-live {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--emerald);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 999px;
+            font-weight: bold;
+        }
+        main {
+            flex: 1;
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .card {
+            background: var(--slate-800);
+            border: 1px solid var(--slate-700);
+            border-radius: 12px;
+            padding: 14px;
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .card-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #38bdf8;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        @media (max-width: 540px) {
+            .form-row { grid-template-columns: 1fr; }
+        }
+        label {
+            display: block;
+            font-size: 12px;
+            color: #94a3b8;
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+        select, input, textarea {
+            width: 100%;
+            background: var(--slate-900);
+            border: 1px solid var(--slate-700);
+            border-radius: 8px;
+            padding: 9px 12px;
+            color: #fff;
+            font-size: 14px;
+            font-family: inherit;
+        }
+        select:focus, input:focus, textarea:focus {
+            outline: none;
+            border-color: #38bdf8;
+        }
+        .machine-info {
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 12px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 8px;
+            border: 1px dashed var(--slate-700);
+        }
+        .machine-info div b {
+            color: #94a3b8;
+            display: block;
+            font-size: 10px;
+        }
+        .machine-info div span {
+            color: #f1f5f9;
+            font-weight: 600;
+        }
+
+        /* Chat Console */
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            flex: 1;
+        }
+        .messages-area {
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid var(--slate-700);
+            border-radius: 12px;
+            padding: 12px;
+            min-height: 250px;
+            max-height: 450px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .message {
+            max-width: 88%;
+            padding: 10px 14px;
+            border-radius: 14px;
+            font-size: 13.5px;
+            line-height: 1.5;
+            word-wrap: break-word;
+        }
+        .message.user {
+            align-self: flex-start;
+            background: var(--primary);
+            color: #fff;
+            border-bottom-right-radius: 4px;
+        }
+        .message.assistant {
+            align-self: flex-end;
+            background: var(--slate-800);
+            color: var(--slate-100);
+            border: 1px solid var(--slate-700);
+            border-bottom-left-radius: 4px;
+        }
+        .message .msg-meta {
+            font-size: 10px;
+            opacity: 0.7;
+            margin-top: 4px;
+            text-align: left;
+        }
+        .parts-grid {
+            margin-top: 8px;
+            display: grid;
+            gap: 6px;
+        }
+        .part-chip {
+            background: rgba(30, 41, 59, 0.9);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            border-radius: 6px;
+            padding: 6px 10px;
+            font-size: 11.5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .stock-tag {
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .stock-tag.in { background: rgba(16, 185, 129, 0.2); color: var(--emerald); }
+        .stock-tag.out { background: rgba(239, 68, 68, 0.2); color: var(--red); }
+
+        /* Input Controls */
+        .chat-input-bar {
+            display: flex;
+            gap: 8px;
+        }
+        .btn {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 18px;
+            font-size: 13.5px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .btn:hover { background: var(--primary-hover); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn.btn-emerald { background: var(--emerald); }
+        .btn.btn-emerald:hover { background: #059669; }
+        .btn.btn-red { background: var(--red); }
+
+        .session-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 6px;
+        }
+        .session-badge {
+            font-size: 11px;
+            color: #94a3b8;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            padding: 16px;
+        }
+        .modal {
+            background: var(--slate-800);
+            border: 1px solid var(--slate-700);
+            border-radius: 14px;
+            max-width: 480px;
+            width: 100%;
+            padding: 18px;
+        }
+        .modal h3 {
+            margin: 0 0 10px;
+            font-size: 16px;
+            color: #38bdf8;
+        }
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 14px;
+        }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-title">
+            <h1>🛠️ منظومة الصيانة الذكية <span style="font-size: 12px; color: #94a3b8;">(Core API & PWA)</span></h1>
+            <p>تشخيص فوري من كتالوجات الماكينات | جلسات مؤقتة مع تلخيص وتطهير ذاتي</p>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+            <span id="backend-status" class="badge-live">جاري الاتصال...</span>
+            <button id="btn-open-settings" class="btn" style="padding: 4px 10px; font-size: 11px; background: var(--slate-700);" title="إعدادات الربط السحابي بدون أنفاق">⚙️ السحابة</button>
+        </div>
+    </header>
+
+    <main>
+        <!-- 1. Machine Selection Card -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">🏭 اختيار الماكينة</h2>
+                <span id="machines-count" class="badge-live" style="background: transparent; border: none; color: #94a3b8;">0 ماكينة</span>
+            </div>
+            <div class="form-row">
+                <div>
+                    <label for="select-site">الموقع (Site):</label>
+                    <select id="select-site">
+                        <option value="">-- اختر الموقع --</option>
+                        <option value="ACACIA">مبنى الأكاسيا (ACACIA)</option>
+                        <option value="PALMIER">مبنى البالميي (PALMIER)</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="select-section">القسم (Section / Line):</label>
+                    <select id="select-section" disabled>
+                        <option value="">-- اختر القسم أولاً --</option>
+                    </select>
+                </div>
+            </div>
+            <div>
+                <label for="select-machine">الماكينة المستهدفة:</label>
+                <select id="select-machine" disabled>
+                    <option value="">-- اختر الماكينة للتشخيص --</option>
+                </select>
+            </div>
+            <div id="machine-details" class="machine-info hidden" style="margin-top: 10px;">
+                <div><b>كود الماكينة (ID)</b><span id="det-id">-</span></div>
+                <div><b>كود JDE</b><span id="det-jde">-</span></div>
+                <div><b>الموديل / المُصنع</b><span id="det-model">-</span></div>
+                <div><b>الغرفة</b><span id="det-room">-</span></div>
+            </div>
+        </div>
+
+        <!-- 2. Diagnostic & Ephemeral Chat Card -->
+        <div id="chat-section" class="card chat-container hidden">
+            <div class="card-header">
+                <h2 class="card-title">💬 جلسة تشخيص العطل المؤقتة</h2>
+                <span id="session-status" class="badge-live">نشطة 🟢</span>
+            </div>
+            <div id="messages-area" class="messages-area">
+                <div class="message assistant">
+                    مرحباً بك! اخترت ماكينة <b id="chat-mach-name">...</b>.<br>
+                    اكتب وصف العطل أو كود الإنذار للبحث المباشر في الكتالوج الرسمي.
+                    <div class="msg-meta">الكتالوج متصل ومفهرس</div>
+                </div>
+            </div>
+
+            <div class="chat-input-bar">
+                <input type="text" id="query-input" placeholder="اكتب وصف العطل أو كود الإنذار (مثال: Alarm 240 heating)..." />
+                <button id="btn-send" class="btn">
+                    <span>اسأل الكتالوج</span> 🔍
+                </button>
+            </div>
+
+            <div class="session-actions">
+                <span id="session-id-display" class="session-badge">جلسة: غير محددة</span>
+                <button id="btn-open-close-modal" class="btn btn-emerald" style="padding: 6px 12px; font-size: 12px;">
+                    ✅ تم حل العطل وإغلاق الشات
+                </button>
+            </div>
+        </div>
+
+        <!-- 3. Closed Session Summary Confirmation Banner -->
+        <div id="archive-banner" class="card hidden" style="border-color: var(--emerald); background: rgba(16, 185, 129, 0.08);">
+            <h3 style="color: var(--emerald); margin: 0 0 6px; font-size: 14px;">✅ تم إغلاق الجلسة وتطهير الذاكرة</h3>
+            <p id="archive-summary-text" style="font-size: 12px; color: #cbd5e1; margin: 0; line-height: 1.5;"></p>
+            <p style="font-size: 11px; color: #94a3b8; margin: 6px 0 0;">تم حفظ الملخص الهندسي فقط في سجل أرشفة الماكينة ومسح رسائل الشات المؤقتة من الذاكرة لضمان الخصوصية وسرعة الأداء.</p>
+        </div>
+    </main>
+
+    <!-- Close Session Modal -->
+    <div id="close-modal" class="modal-overlay hidden">
+        <div class="modal">
+            <h3>اعتماد الحل وإغلاق الجلسة</h3>
+            <p style="font-size: 12px; color: #94a3b8; margin: 0 0 10px;">
+                سيتم استخراج ملخص هندسي وحفظه في سجل أعطال الماكينة، ومسح المحادثة المؤقتة نهائياً من الذاكرة.
+            </p>
+            <label for="close-notes">إيه الإجراء أو الحل اللي تم تطبيقه؟ (اختياري):</label>
+            <textarea id="close-notes" rows="3" placeholder="مثال: تم تنظيف الحساس وتغيير الريلاي واشتغلت الماكينة طبيعي..."></textarea>
+            <div class="modal-buttons">
+                <button id="btn-cancel-modal" class="btn" style="background: var(--slate-700);">إلغاء</button>
+                <button id="btn-confirm-close" class="btn btn-emerald">تأكيد وحفظ الملخص</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cloud Broker Settings Modal -->
+    <div id="settings-modal" class="modal-overlay hidden">
+        <div class="modal">
+            <h3>⚙️ ربط وسيط السحابة (Zero-Tunnel Outbound)</h3>
+            <p style="font-size: 12px; color: #94a3b8; margin: 0 0 10px; line-height: 1.5;">
+                لتشغيل المنظومة من خارج الشبكة بدون فتح أي أنفاق أو منافذ على السيرفر، أدخل بيانات Supabase:
+            </p>
+            <label for="cfg-supabase-url">رابط المشروع (Supabase URL):</label>
+            <input type="text" id="cfg-supabase-url" placeholder="https://xyz.supabase.co" style="margin-bottom: 8px;" />
+
+            <label for="cfg-supabase-key">المفتاح العام (Anon Public Key):</label>
+            <input type="text" id="cfg-supabase-key" placeholder="eyJhbGciOi..." style="margin-bottom: 12px;" />
+
+            <div style="display: flex; gap: 8px; justify-content: space-between; align-items: center;">
+                <button id="btn-clear-settings" class="btn btn-red" style="padding: 6px 10px; font-size: 11px;">مسح (وضع محلي)</button>
+                <div style="display: flex; gap: 8px;">
+                    <button id="btn-cancel-settings" class="btn" style="background: var(--slate-700); font-size: 12px;">إلغاء</button>
+                    <button id="btn-save-settings" class="btn btn-emerald" style="font-size: 12px;">حفظ وتفعيل</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allMachines = [];
+        let sectionsBySite = {};
+        let currentSessionId = null;
+        let selectedMachine = null;
+        let brokerMode = 'local'; // 'cloud' or 'local'
+        let supabaseClient = null;
+        let jobPollTimer = null;
+
+        // Elements
+        const selectSite = document.getElementById('select-site');
+        const selectSection = document.getElementById('select-section');
+        const selectMachine = document.getElementById('select-machine');
+        const machineDetails = document.getElementById('machine-details');
+        const chatSection = document.getElementById('chat-section');
+        const messagesArea = document.getElementById('messages-area');
+        const queryInput = document.getElementById('query-input');
+        const btnSend = document.getElementById('btn-send');
+        const sessionIdDisplay = document.getElementById('session-id-display');
+        const btnOpenCloseModal = document.getElementById('btn-open-close-modal');
+        const closeModal = document.getElementById('close-modal');
+        const btnCancelModal = document.getElementById('btn-cancel-modal');
+        const btnConfirmClose = document.getElementById('btn-confirm-close');
+        const closeNotes = document.getElementById('close-notes');
+        const archiveBanner = document.getElementById('archive-banner');
+        const archiveSummaryText = document.getElementById('archive-summary-text');
+        const backendStatus = document.getElementById('backend-status');
+
+        // Settings Elements
+        const btnOpenSettings = document.getElementById('btn-open-settings');
+        const settingsModal = document.getElementById('settings-modal');
+        const btnCancelSettings = document.getElementById('btn-cancel-settings');
+        const btnSaveSettings = document.getElementById('btn-save-settings');
+        const btnClearSettings = document.getElementById('btn-clear-settings');
+        const cfgSupabaseUrl = document.getElementById('cfg-supabase-url');
+        const cfgSupabaseKey = document.getElementById('cfg-supabase-key');
+
+        // 1. Settings Dialog Handlers
+        btnOpenSettings.addEventListener('click', () => {
+            cfgSupabaseUrl.value = localStorage.getItem('PRJ30_SUPABASE_URL') || '';
+            cfgSupabaseKey.value = localStorage.getItem('PRJ30_SUPABASE_KEY') || '';
+            settingsModal.classList.remove('hidden');
+        });
+
+        btnCancelSettings.addEventListener('click', () => {
+            settingsModal.classList.add('hidden');
+        });
+
+        btnSaveSettings.addEventListener('click', () => {
+            const url = cfgSupabaseUrl.value.trim();
+            const key = cfgSupabaseKey.value.trim();
+            if (url && key) {
+                localStorage.setItem('PRJ30_SUPABASE_URL', url);
+                localStorage.setItem('PRJ30_SUPABASE_KEY', key);
+            }
+            settingsModal.classList.add('hidden');
+            init();
+        });
+
+        btnClearSettings.addEventListener('click', () => {
+            localStorage.removeItem('PRJ30_SUPABASE_URL');
+            localStorage.removeItem('PRJ30_SUPABASE_KEY');
+            settingsModal.classList.add('hidden');
+            init();
+        });
+
+        const QUEUE_CHANNEL = "cairo_tech_pwa_queue_78a1bc49df20";
+
+        // 2. Initialize App and Cloud Broker
+        async function init() {
+            const storedUrl = localStorage.getItem('PRJ30_SUPABASE_URL');
+            const storedKey = localStorage.getItem('PRJ30_SUPABASE_KEY');
+
+            if (storedUrl && storedKey && window.supabase) {
+                try {
+                    supabaseClient = window.supabase.createClient(storedUrl, storedKey);
+                    brokerMode = 'supabase';
+                    backendStatus.textContent = 'سحابي Supabase ☁️';
+                    backendStatus.style.borderColor = 'rgba(56, 189, 248, 0.4)';
+                    backendStatus.style.color = '#38bdf8';
+                } catch (e) {
+                    brokerMode = '4g-relay';
+                }
+            } else if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                brokerMode = 'local';
+                backendStatus.textContent = 'محلي LAN 🟢';
+                backendStatus.style.borderColor = 'rgba(16, 185, 129, 0.3)';
+                backendStatus.style.color = 'var(--emerald)';
+            } else {
+                brokerMode = '4g-relay';
+                backendStatus.textContent = 'سحابي 4G مباشر (Zero-Tunnel) 🟢';
+                backendStatus.style.borderColor = 'rgba(16, 185, 129, 0.4)';
+                backendStatus.style.color = 'var(--emerald)';
+            }
+
+            // Fetch machine catalog (local API or static fallback)
+            try {
+                let data = null;
+                try {
+                    const res = await fetch('./machines.json');
+                    if (res.ok) {
+                        const staticMachines = await res.json();
+                        const sections = { ACACIA: new Set(), PALMIER: new Set() };
+                        staticMachines.forEach(m => {
+                            const b = (m.building || '').toUpperCase();
+                            if (sections[b]) {
+                                sections[b].add(m.section || m.area || 'عام');
+                            }
+                        });
+                        data = {
+                            machines: staticMachines,
+                            sections_by_site: {
+                                ACACIA: Array.from(sections.ACACIA),
+                                PALMIER: Array.from(sections.PALMIER)
+                            }
+                        };
+                    }
+                } catch(e) {}
+
+                if (!data && brokerMode === 'local') {
+                    const res = await fetch('/api/machines');
+                    if (res.ok) data = await res.json();
+                }
+
+                allMachines = data.machines || [];
+                sectionsBySite = data.sections_by_site || {};
+                document.getElementById('machines-count').textContent = `${allMachines.length} ماكينة معتمدة`;
+            } catch (e) {
+                backendStatus.textContent = 'خطأ بالتحميل 🔴';
+                backendStatus.style.borderColor = 'var(--red)';
+                backendStatus.style.color = 'var(--red)';
+            }
+        }
+
+        // 3. Cascading selects
+        selectSite.addEventListener('change', () => {
+            const site = selectSite.value;
+            selectSection.innerHTML = '<option value="">-- اختر القسم --</option>';
+            selectMachine.innerHTML = '<option value="">-- اختر الماكينة --</option>';
+            selectMachine.disabled = true;
+            machineDetails.classList.add('hidden');
+            chatSection.classList.add('hidden');
+
+            if (!site || !sectionsBySite[site]) {
+                selectSection.disabled = true;
+                return;
+            }
+
+            sectionsBySite[site].forEach(sec => {
+                const opt = document.createElement('option');
+                opt.value = sec;
+                opt.textContent = sec;
+                selectSection.appendChild(opt);
+            });
+            selectSection.disabled = false;
+        });
+
+        selectSection.addEventListener('change', () => {
+            const site = selectSite.value;
+            const sec = selectSection.value;
+            selectMachine.innerHTML = '<option value="">-- اختر الماكينة للتشخيص --</option>';
+            machineDetails.classList.add('hidden');
+            chatSection.classList.add('hidden');
+
+            if (!sec) {
+                selectMachine.disabled = true;
+                return;
+            }
+
+            const filtered = allMachines.filter(m => {
+                const bldMatch = (m.building || '').toUpperCase() === site;
+                const secMatch = (m.section || '').toLowerCase() === sec.toLowerCase() || (m.area || '').toLowerCase() === sec.toLowerCase();
+                return bldMatch && secMatch;
+            });
+
+            filtered.forEach(m => {
+                const opt = document.createElement('option');
+                opt.value = m.id;
+                opt.textContent = m.display_name || m.id;
+                selectMachine.appendChild(opt);
+            });
+            selectMachine.disabled = false;
+        });
+
+        selectMachine.addEventListener('change', () => {
+            const machId = selectMachine.value;
+            if (!machId) {
+                machineDetails.classList.add('hidden');
+                chatSection.classList.add('hidden');
+                return;
+            }
+
+            selectedMachine = allMachines.find(m => m.id === machId);
+            if (selectedMachine) {
+                document.getElementById('det-id').textContent = selectedMachine.id;
+                document.getElementById('det-jde').textContent = selectedMachine.jde_code || 'N/A';
+                document.getElementById('det-model').textContent = `${selectedMachine.manufacturer || ''} ${selectedMachine.model || ''}`.trim() || 'N/A';
+                document.getElementById('det-room').textContent = selectedMachine.room_no || 'N/A';
+                machineDetails.classList.remove('hidden');
+
+                // Reset chat
+                currentSessionId = null;
+                if (jobPollTimer) { clearInterval(jobPollTimer); jobPollTimer = null; }
+
+                document.getElementById('chat-mach-name').textContent = selectedMachine.display_name || selectedMachine.id;
+                messagesArea.innerHTML = `
+                    <div class="message assistant">
+                        مرحباً بك! اخترت ماكينة <b>${selectedMachine.display_name || selectedMachine.id}</b>.<br>
+                        اكتب وصف العطل أو كود الإنذار للبحث المباشر في الكتالوج الرسمي.
+                        <div class="msg-meta">الكتالوج مفهرس | النمط: ${brokerMode === 'cloud' ? 'وسيط سحابي (Supabase)' : 'مباشر (Local)'}</div>
+                    </div>
+                `;
+                sessionIdDisplay.textContent = 'جلسة: جديدة (تُنشأ مع أول سؤال)';
+                chatSection.classList.remove('hidden');
+                archiveBanner.classList.add('hidden');
+            }
+        });
+
+        // 4. Send Question to Catalog (Dual Mode)
+        async function sendQuery() {
+            const q = queryInput.value.trim();
+            if (!q || !selectedMachine) return;
+
+            appendMessage('user', q);
+            queryInput.value = '';
+            btnSend.disabled = true;
+            btnSend.textContent = 'جاري البحث في الكتالوج... ⏳';
+
+            if (brokerMode === '4g-relay') {
+                // Zero-Tunnel 4G Outbound Cloud Queue
+                const jobId = 'job_' + Date.now().toString(36) + '_' + Math.random().toString(36).substr(2, 5);
+                currentSessionId = jobId;
+                sessionIdDisplay.textContent = `مهمة 4G سحابية: ${jobId}`;
+
+                try {
+                    await fetch(`https://ntfy.sh/${QUEUE_CHANNEL}`, {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            job_id: jobId,
+                            machine_id: selectedMachine.id,
+                            query: q,
+                            technician_name: 'Technician (4G)',
+                            status: 'pending'
+                        })
+                    });
+
+                    const resChannel = `${QUEUE_CHANNEL}_res_${jobId}`;
+                    let completed = false;
+
+                    function handleDone(solution, parts) {
+                        if (completed) return;
+                        completed = true;
+                        if (jobPollTimer) { clearInterval(jobPollTimer); jobPollTimer = null; }
+                        if (window._currentES) { window._currentES.close(); window._currentES = null; }
+                        btnSend.disabled = false;
+                        btnSend.innerHTML = '<span>اسأل الكتالوج</span> 🔍';
+                        appendMessage('assistant', solution || 'لا يوجد رد في الكتالوج.', parts);
+                    }
+
+                    try {
+                        const es = new EventSource(`https://ntfy.sh/${resChannel}/sse`);
+                        window._currentES = es;
+                        es.onmessage = (e) => {
+                            try {
+                                const parsed = JSON.parse(e.data);
+                                if (parsed.message) {
+                                    const inner = JSON.parse(parsed.message);
+                                    if (inner.status === 'completed') {
+                                        handleDone(inner.solution, inner.suggested_parts);
+                                    }
+                                }
+                            } catch(err) {}
+                        };
+                    } catch(e) {}
+
+                    jobPollTimer = setInterval(async () => {
+                        try {
+                            const res = await fetch(`https://ntfy.sh/${resChannel}/json?poll=1&since=all`);
+                            const text = await res.text();
+                            const lines = text.trim().split('\n').filter(Boolean);
+                            for (const line of lines) {
+                                const item = JSON.parse(line);
+                                if (item.message) {
+                                    const inner = JSON.parse(item.message);
+                                    if (inner.status === 'completed') {
+                                        handleDone(inner.solution, inner.suggested_parts);
+                                        break;
+                                    }
+                                }
+                            }
+                        } catch(err) {}
+                    }, 1500);
+
+                } catch (e) {
+                    appendMessage('assistant', `⚠️ حدث خطأ في وسيط السحابة: ${e.message}`);
+                    btnSend.disabled = false;
+                    btnSend.innerHTML = '<span>اسأل الكتالوج</span> 🔍';
+                }
+            } else if (brokerMode === 'supabase' && supabaseClient) {
+                // Cloud Broker Mode (Supabase)
+                try {
+                    const { data, error } = await supabaseClient.from('diagnostic_jobs').insert({
+                        machine_id: selectedMachine.id,
+                        query: q,
+                        technician_name: 'Technician PWA',
+                        status: 'pending'
+                    }).select().single();
+
+                    if (error || !data) throw new Error(error ? error.message : 'Failed to create job');
+
+                    currentSessionId = data.id;
+                    sessionIdDisplay.textContent = `مهمة سحابية: ${currentSessionId.slice(0, 8)}...`;
+
+                    // Listen via Realtime channel
+                    const channel = supabaseClient
+                        .channel(`job_${data.id}`)
+                        .on('postgres_changes', {
+                            event: 'UPDATE',
+                            schema: 'public',
+                            table: 'diagnostic_jobs',
+                            filter: `id=eq.${data.id}`
+                        }, (payload) => {
+                            if (payload.new && payload.new.status === 'completed') {
+                                cleanupAndRender(payload.new.solution, payload.new.suggested_parts);
+                            }
+                        })
+                        .subscribe();
+
+                    // Fallback polling every 1.5 seconds
+                    jobPollTimer = setInterval(async () => {
+                        const { data: polled } = await supabaseClient
+                            .from('diagnostic_jobs')
+                            .select('status, solution, suggested_parts')
+                            .eq('id', data.id)
+                            .single();
+
+                        if (polled && polled.status === 'completed') {
+                            cleanupAndRender(polled.solution, polled.suggested_parts);
+                        }
+                    }, 1500);
+
+                    function cleanupAndRender(solution, parts) {
+                        if (jobPollTimer) { clearInterval(jobPollTimer); jobPollTimer = null; }
+                        supabaseClient.removeChannel(channel);
+                        btnSend.disabled = false;
+                        btnSend.innerHTML = '<span>اسأل الكتالوج</span> 🔍';
+                        appendMessage('assistant', solution || 'لا يوجد رد في الكتالوج.', parts);
+                    }
+
+                } catch (e) {
+                    appendMessage('assistant', `⚠️ حدث خطأ في وسيط السحابة: ${e.message}`);
+                    btnSend.disabled = false;
+                    btnSend.innerHTML = '<span>اسأل الكتالوج</span> 🔍';
+                }
+            } else {
+                // Local Direct API Mode
+                try {
+                    const res = await fetch('/api/chat/ask', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            machine_id: selectedMachine.id,
+                            query: q,
+                            session_id: currentSessionId,
+                            technician_name: 'Technician PWA',
+                            language: 'ar'
+                        })
+                    });
+
+                    const data = await res.json();
+                    if (data.session_id) {
+                        currentSessionId = data.session_id;
+                        sessionIdDisplay.textContent = `جلسة: ${currentSessionId}`;
+                    }
+                    appendMessage('assistant', data.solution || 'لا يوجد رد متاح من الكتالوج.', data.suggested_parts);
+                } catch (e) {
+                    appendMessage('assistant', `⚠️ حدث خطأ في الاتصال بالكتالوج: ${e.message}`);
+                } finally {
+                    btnSend.disabled = false;
+                    btnSend.innerHTML = '<span>اسأل الكتالوج</span> 🔍';
+                }
+            }
+        }
+
+        btnSend.addEventListener('click', sendQuery);
+        queryInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') sendQuery();
+        });
+
+        function appendMessage(role, text, parts) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message ${role}`;
+            let formatted = text.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+            msgDiv.innerHTML = formatted;
+
+            if (parts && parts.length > 0) {
+                const partsDiv = document.createElement('div');
+                partsDiv.className = 'parts-grid';
+                partsDiv.innerHTML = '<div style="font-size: 11px; font-weight: bold; color: #38bdf8; margin-top: 6px;">⚙️ قطع الغيار المقترحة من الكتالوج:</div>';
+
+                parts.forEach(p => {
+                    const chip = document.createElement('div');
+                    chip.className = 'part-chip';
+                    const qty = p.qty_on_hand !== undefined ? p.qty_on_hand : 0;
+                    const stockClass = qty > 0 ? 'in' : 'out';
+                    const stockLabel = qty > 0 ? `متوفر (${qty})` : 'غير متوفر';
+                    chip.innerHTML = `
+                        <span>${p.name_en || p.name || 'Part'} <small style="color:#94a3b8">(${p.code_hint || p.code || 'N/A'})</small></span>
+                        <span class="stock-tag ${stockClass}">${stockLabel}</span>
+                    `;
+                    partsDiv.appendChild(chip);
+                });
+                msgDiv.appendChild(partsDiv);
+            }
+
+            const meta = document.createElement('div');
+            meta.className = 'msg-meta';
+            meta.textContent = new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
+            msgDiv.appendChild(meta);
+
+            messagesArea.appendChild(msgDiv);
+            messagesArea.scrollTop = messagesArea.scrollHeight;
+        }
+
+        // 5. Close Session Workflow
+        btnOpenCloseModal.addEventListener('click', () => {
+            if (!currentSessionId) {
+                alert('لم تبدأ جلسة بعد لحفظها.');
+                return;
+            }
+            closeModal.classList.remove('hidden');
+        });
+
+        btnCancelModal.addEventListener('click', () => {
+            closeModal.classList.add('hidden');
+        });
+
+        btnConfirmClose.addEventListener('click', async () => {
+            if (!currentSessionId) return;
+            const notes = closeNotes.value.trim();
+            btnConfirmClose.disabled = true;
+            btnConfirmClose.textContent = 'جاري الحفظ والتطهير...';
+
+            if (brokerMode === '4g-relay') {
+                try {
+                    await fetch(`https://ntfy.sh/${QUEUE_CHANNEL}_close`, {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            job_id: currentSessionId,
+                            machine_id: selectedMachine.id,
+                            technician_notes: notes || 'تم حل العطل وإغلاق الجلسة بواسطة الفني عبر 4G.',
+                            status: 'closed',
+                            solution: 'Incident resolved.'
+                        })
+                    });
+                    closeModal.classList.add('hidden');
+                    chatSection.classList.add('hidden');
+                    archiveSummaryText.textContent = `تم تسجيل إغلاق المهمة السحابية بنجاح (${currentSessionId}). قام عامل السيرفر بأرشفتها وتطهير الجلسة.`;
+                    archiveBanner.classList.remove('hidden');
+                    currentSessionId = null;
+                } catch(e) {
+                    alert(`خطأ أثناء إغلاق الجلسة: ${e.message}`);
+                } finally {
+                    btnConfirmClose.disabled = false;
+                    btnConfirmClose.textContent = 'تأكيد وحفظ الملخص';
+                }
+            } else if (brokerMode === 'supabase' && supabaseClient) {
+                try {
+                    await supabaseClient.from('diagnostic_jobs').update({
+                        status: 'closed',
+                        technician_notes: notes || 'تم حل العطل واغلاق الجلسة بواسطة الفني عبر الـ PWA.'
+                    }).eq('id', currentSessionId);
+
+                    closeModal.classList.add('hidden');
+                    chatSection.classList.add('hidden');
+                    archiveSummaryText.textContent = `تم تسجيل إغلاق المهمة السحابية بنجاح (${currentSessionId.slice(0, 8)}). سيقوم عامل السيرفر بأرشفتها ذاتياً وتطهيرها.`;
+                    archiveBanner.classList.remove('hidden');
+                    currentSessionId = null;
+                } catch (e) {
+                    alert(`خطأ أثناء إغلاق الجلسة السحابية: ${e.message}`);
+                } finally {
+                    btnConfirmClose.disabled = false;
+                    btnConfirmClose.textContent = 'تأكيد وحفظ الملخص';
+                }
+            } else {
+                try {
+                    const res = await fetch('/api/chat/close', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            session_id: currentSessionId,
+                            technician_notes: notes
+                        })
+                    });
+                    const data = await res.json();
+                    closeModal.classList.add('hidden');
+                    chatSection.classList.add('hidden');
+
+                    archiveSummaryText.textContent = data.summary || 'تم تسجيل حل العطل بنجاح.';
+                    archiveBanner.classList.remove('hidden');
+                    currentSessionId = null;
+                } catch (e) {
+                    alert(`خطأ أثناء إغلاق الجلسة: ${e.message}`);
+                } finally {
+                    btnConfirmClose.disabled = false;
+                    btnConfirmClose.textContent = 'تأكيد وحفظ الملخص';
+                }
+            }
+        });
+
+        init();
+    </script>
+</body>
+</html>
