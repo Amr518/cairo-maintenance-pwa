@@ -1159,19 +1159,16 @@
                     const location = (p.location || p.bin || '').trim();
                     const warehouse = (p.warehouse || p.business_unit || '').trim();
                     const role = (p.role_ar || p.role || '').trim();
-                    const stockStatus = p.stock_status || (qty > 0 ? 'IN_STOCK' : (location && location !== 'غير مدرج' ? 'ZERO_STOCK' : 'NOT_IN_DB'));
+                    const stockStatus = p.stock_status || (qty > 0 ? 'IN_STOCK' : 'OUT_OF_STOCK');
 
-                    let stockClass = 'none';
-                    let stockLabel = 'غير مدرج بالمخزن';
-                    if (qty > 0) {
+                    let stockClass = 'out';
+                    let stockLabel = 'غير متوفر';
+                    if (qty > 0 || stockStatus === 'IN_STOCK') {
                         stockClass = 'in';
-                        stockLabel = `متوفر (${qty})`;
-                    } else if (stockStatus === 'ZERO_STOCK' || (location && location !== 'غير مدرج')) {
-                        stockClass = 'out';
-                        stockLabel = 'رصيد 0 بالمخزن';
+                        stockLabel = 'متوفر';
                     } else {
-                        stockClass = 'none';
-                        stockLabel = 'غير مدرج بالجرد';
+                        stockClass = 'out';
+                        stockLabel = 'غير متوفر';
                     }
 
                     let locHtml = '';
